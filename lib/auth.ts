@@ -1,29 +1,13 @@
 import crypto from "crypto";
 
-const OTP_TTL_MS = 5 * 60 * 1000;
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 const SESSION_COOKIE = "apna_kaam_session";
 
-type OtpRecord = { code: string; expiresAt: number };
 export type SessionPayload = { userId: string; role: "CUSTOMER" | "PROVIDER" | "ADMIN"; exp: number };
-const otpStore = new Map<string, OtpRecord>();
 
 export function normalizePhone(input: string) {
   const digits = input.replace(/\D/g, "");
   return digits.length === 10 ? `+91${digits}` : null;
-}
-
-export function issueOtp(phone: string) {
-  const code = process.env.NODE_ENV === "development" ? "123456" : crypto.randomInt(100000, 1000000).toString();
-  otpStore.set(phone, { code, expiresAt: Date.now() + OTP_TTL_MS });
-  return code;
-}
-
-export function verifyOtp(phone: string, code: string) {
-  const record = otpStore.get(phone);
-  if (!record || record.expiresAt < Date.now() || record.code !== code) return false;
-  otpStore.delete(phone);
-  return true;
 }
 
 function sessionSecret() {
