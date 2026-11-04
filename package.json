@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit",
     "seed": "prisma db seed",
     "android:sync": "cap sync android",
-    "android:open": "cap open android"
+    "android:open": "cap open android",
+    "postinstall": "prisma generate"
   },
   "dependencies": {
     "next": "15.5.28",
