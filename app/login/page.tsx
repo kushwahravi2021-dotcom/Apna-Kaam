@@ -109,7 +109,7 @@ export default function LoginPage() {
 
         {notice && <p role="status" className="mt-4 rounded-lg bg-green-50 p-3 text-sm text-green-800">{notice}</p>}
         {error && <p role="alert" className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-        <p className="mt-5 text-center text-xs text-gray-500">अभी डेवलपमेंट मोड में OTP टेस्ट किया जा सकता है। असली SMS सेवा जोड़ना बाकी है।</p>
+        <p className="mt-5 text-center text-xs text-gray-500">Demo में OTP स्क्रीन पर दिखेगा। Official launch पर असली SMS सेवा configure होगी।</p>
         <Link href="/" className="mt-6 block text-center text-sm font-semibold text-green-700">← Home पर जाएं</Link>
       </div>
     </main>
