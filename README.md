@@ -21,7 +21,7 @@ Apna Kaam is a mobile-first Indian local-services marketplace for customers, ser
 - PWA manifest and offline fallback
 - CI type-check and production build workflow
 
-## Demo testing mode (before official launch)\n\nSet `DEMO_MODE=true` and `NEXT_PUBLIC_DEMO_MODE=true` in the demo deployment. Demo mode uses the fixed OTP `123456` even on a hosted deployment, does not send SMS, disables online payments, and displays a visible demo warning. This is intentionally insecure for testing only: use a separate demo database, fake/sample contact details, and never store real customer/payment information. Turn both flags off and configure Twilio/Razorpay before official launch.\n\n## Requirements
+## Demo testing mode (before official launch)\n\nSet `DEMO_MODE=true` and `NEXT_PUBLIC_DEMO_MODE=true` in the demo deployment. Demo mode uses the fixed OTP `123456` even on a hosted deployment, does not send SMS, disables online payments, and displays a visible demo warning. This is intentionally insecure for testing only: use a separate demo database, fake/sample contact details, and never store real customer/payment information. Run `npx prisma db seed` after enabling demo mode to create sample providers. Sample provider logins: Ramesh `9999990001`, Suresh `9999990002`, Asha `9999990003`; all use OTP `123456`. Any other test phone can create a customer account. Configure `ADMIN_PHONE` before seeding if an admin dashboard is needed. Turn both demo flags off and configure Twilio/Razorpay before official launch.\n\n## Requirements
 
 - Node.js 20+
 - npm
