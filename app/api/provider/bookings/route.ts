@@ -16,7 +16,7 @@ export async function GET() {
     select:{id:true,description:true,scheduledAt:true,status:true,createdAt:true,
       category:{select:{name:true,icon:true}},
       customer:{select:{name:true,phone:true}},
-      address:{select:{label:true,line1:true,city:true,area:true}},
+      address:{select:{label:true,line1:true,city:true,area:true,latitude:true,longitude:true}},
       statusHistory:{orderBy:{createdAt:"asc"},select:{status:true,note:true,createdAt:true}}
     }
   });
