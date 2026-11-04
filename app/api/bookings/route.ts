@@ -38,6 +38,7 @@ export async function GET() {
       provider: { select: { user: { select: { name: true, phone: true } } } },
       address: { select: { label: true, line1: true, city: true, area: true } },
       statusHistory: { orderBy: { createdAt: "asc" }, select: { status: true, note: true, createdAt: true } },
+      review: { select: { id: true, rating: true, comment: true } },
     },
   });
   return NextResponse.json({ ok: true, bookings });
