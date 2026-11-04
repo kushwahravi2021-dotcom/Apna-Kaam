@@ -25,7 +25,11 @@ export async function PATCH(request: Request) {
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ ok: false, message: "नाम और शहर सही भरें।", errors: parsed.error.flatten().fieldErrors }, { status: 400 });
   try {
-    const updated = await prisma.user.update({ where: { id: user.id }, data: parsed.data, select: { id: true, phone: true, role: true, name: true, city: true, area: true } });
+    const updated = await prisma.$transaction(async tx => {
+      const saved = await tx.user.update({ where: { id: user.id }, data: parsed.data, select: { id: true, phone: true, role: true, name: true, city: true, area: true } });
+      if (saved.role === "PROVIDER") await tx.providerProfile.updateMany({ where: { userId: user.id }, data: { serviceArea: parsed.data.area } });
+      return saved;
+    });
     return NextResponse.json({ ok: true, user: updated });
   } catch (error) {
     console.error("Profile update error:", error);
