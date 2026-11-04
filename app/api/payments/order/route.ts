@@ -7,6 +7,7 @@ import { readSessionToken, sessionCookieName } from "@/lib/auth";
 export const runtime = "nodejs";
 const schema = z.object({ bookingId: z.string().min(1) });
 export async function POST(request: Request) {
+  if (process.env.DEMO_MODE === "true") return NextResponse.json({ ok: false, message: "Demo mode में online payment बंद है।" }, { status: 503 });
   const store = await cookies();
   const session = readSessionToken(store.get(sessionCookieName)?.value);
   if (!session) return NextResponse.json({ ok: false, message: "पहले login करें।" }, { status: 401 });
