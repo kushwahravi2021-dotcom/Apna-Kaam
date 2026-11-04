@@ -6,6 +6,7 @@ export async function GET(request: Request) {
   const city = searchParams.get("city")?.trim();
   const area = searchParams.get("area")?.trim();
   const categoryId = searchParams.get("categoryId")?.trim();
+  const categoryName = searchParams.get("service")?.trim();
   try {
     const providers = await prisma.providerProfile.findMany({
       where: {
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
         ...(city ? { user: { city: { equals: city, mode: "insensitive" } } } : {}),
         ...(area ? { serviceArea: { contains: area, mode: "insensitive" } } : {}),
         ...(categoryId ? { services: { some: { categoryId } } } : {}),
+        ...(categoryName ? { services: { some: { category: { name: { equals: categoryName, mode: "insensitive" } } } } } : {}),
       },
       orderBy: [{ rating: "desc" }, { reviewCount: "desc" }],
       take: 50,
