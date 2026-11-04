@@ -24,7 +24,7 @@ export default function LoginPage() {
     event.preventDefault();
     setError("");
     setNotice("");
-    if (!/^\\d{10}$/.test(phone)) {
+    if (!/^\d{10}$/.test(phone)) {
       setError("कृपया 10 अंकों का सही मोबाइल नंबर डालें।");
       return;
     }
@@ -51,7 +51,7 @@ export default function LoginPage() {
     event.preventDefault();
     setError("");
     setNotice("");
-    if (!/^\\d{6}$/.test(otp)) {
+    if (!/^\d{6}$/.test(otp)) {
       setError("कृपया 6 अंकों का OTP डालें।");
       return;
     }
@@ -91,7 +91,7 @@ export default function LoginPage() {
             <label htmlFor="phone" className="text-sm font-semibold text-gray-800">Mobile Number</label>
             <div className="mt-2 flex rounded-xl border border-gray-200 px-3 focus-within:border-green-600">
               <span className="flex items-center border-r pr-3 text-sm text-gray-600">+91</span>
-              <input id="phone" className="w-full px-3 py-3 outline-none" placeholder="10 digit mobile number" inputMode="numeric" autoComplete="tel-national" maxLength={10} value={phone} onChange={(event) => setPhone(event.target.value.replace(/\\D/g, "").slice(0, 10))} />
+              <input id="phone" className="w-full px-3 py-3 outline-none" placeholder="10 digit mobile number" inputMode="numeric" autoComplete="tel-national" maxLength={10} value={phone} onChange={(event) => setPhone(event.target.value.replace(/\D/g, "").slice(0, 10))} />
             </div>
             <button disabled={loading} className="mt-4 w-full rounded-xl bg-green-600 py-3.5 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
               {loading ? "भेज रहे हैं..." : "Send OTP"}
@@ -101,7 +101,7 @@ export default function LoginPage() {
           <form className="mt-9" onSubmit={verifyOtp}>
             <p className="text-sm text-gray-600">+91 {phone} पर भेजा गया 6 अंकों का OTP डालें।</p>
             <label htmlFor="otp" className="mt-4 block text-sm font-semibold text-gray-800">OTP</label>
-            <input id="otp" className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-center text-xl tracking-[0.4em] outline-none focus:border-green-600" placeholder="••••••" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\\D/g, "").slice(0, 6))} />
+            <input id="otp" className="mt-2 w-full rounded-xl border border-gray-200 px-4 py-3 text-center text-xl tracking-[0.4em] outline-none focus:border-green-600" placeholder="••••••" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={otp} onChange={(event) => setOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} />
             <button disabled={loading} className="mt-4 w-full rounded-xl bg-green-600 py-3.5 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60">
               {loading ? "जाँच रहे हैं..." : "Verify OTP"}
             </button>
