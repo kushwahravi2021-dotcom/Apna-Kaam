@@ -32,7 +32,7 @@ Apna Kaam is a mobile-first Indian local-services marketplace for customers, ser
    - `NEXT_PUBLIC_DEMO_MODE`: `true`.
    - `ADMIN_PHONE`: optional 10-digit mobile number for the demo administrator.
 4. Deploy. The included `vercel.json` runs `prisma db push` before the Next.js build to initialize the demo database.
-5. After the first deployment, open the Vercel project terminal or use a trusted local shell with the same `DATABASE_URL` and run `npx prisma db seed` once to add sample categories and demo providers.
+5. The build automatically seeds the service categories and (when demo mode is enabled) sample providers.
 
 Do not share the database URL or `AUTH_SECRET) in chat or commit them to Git. Demo mode is deliberately insecure and must only use a separate test database.
 
