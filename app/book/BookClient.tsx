@@ -12,7 +12,8 @@ export default function BookPage() {
   const [provider, setProvider] = useState<Provider | null>(null);
   const [scheduledAt, setScheduledAt] = useState("");
   const [description, setDescription] = useState("");
-  const [address, setAddress] = useState({label:"Home",line1:"",city:"",area:""});
+  const [address, setAddress] = useState<{label:string;line1:string;city:string;area:string;latitude:number|null;longitude:number|null}>({label:"Home",line1:"",city:"",area:"",latitude:null,longitude:null});
+  const [geoMessage,setGeoMessage] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -23,6 +24,15 @@ export default function BookPage() {
       .catch(e=>setError(e instanceof Error?e.message:"Provider लोड नहीं हुआ"))
       .finally(()=>setLoading(false));
   },[providerId,categoryId]);
+  function useCurrentLocation() {
+    setGeoMessage("");
+    if (!navigator.geolocation) { setGeoMessage("इस device पर location सुविधा उपलब्ध नहीं है।"); return; }
+    navigator.geolocation.getCurrentPosition(
+      position => { setAddress(old => ({...old,latitude:position.coords.latitude,longitude:position.coords.longitude})); setGeoMessage("Location जुड़ गई। पूरा पता भी भरें।"); },
+      () => setGeoMessage("Location नहीं मिल सकी। Browser में location permission दें।"),
+      { enableHighAccuracy:true, timeout:10000, maximumAge:60000 }
+    );
+  }
   async function submit(e:FormEvent<HTMLFormElement>) {
     e.preventDefault(); setError(""); setSaving(true);
     try {
@@ -39,7 +49,7 @@ export default function BookPage() {
       <div><label className="text-sm font-semibold">काम कब करवाना है?</label><input required type="datetime-local" className={input} value={scheduledAt} onChange={e=>setScheduledAt(e.target.value)} /></div>
       <div><label className="text-sm font-semibold">काम का विवरण</label><textarea required minLength={5} maxLength={1000} rows={3} className={input} placeholder="समस्या या काम के बारे में बताएं" value={description} onChange={e=>setDescription(e.target.value)} /></div>
       <div><label className="text-sm font-semibold">Address label</label><input required className={input} value={address.label} onChange={e=>setAddress({...address,label:e.target.value})}/></div>
-      <div><label className="text-sm font-semibold">पूरा पता</label><textarea required minLength={5} rows={2} className={input} value={address.line1} onChange={e=>setAddress({...address,line1:e.target.value})}/></div>
+      <div><label className="text-sm font-semibold">पूरा पता</label><textarea required minLength={5} rows={2} className={input} value={address.line1} onChange={e=>setAddress({...address,line1:e.target.value})}/></div><div><button type="button" onClick={useCurrentLocation} className="rounded-xl border border-green-200 px-3 py-2 text-xs font-semibold text-green-700">मेरी current location जोड़ें</button>{geoMessage&&<p className="mt-1 text-xs text-gray-500">{geoMessage}</p>}</div>
       <div className="grid grid-cols-2 gap-3"><div><label className="text-sm font-semibold">शहर</label><input required className={input} value={address.city} onChange={e=>setAddress({...address,city:e.target.value})}/></div><div><label className="text-sm font-semibold">इलाका</label><input className={input} value={address.area} onChange={e=>setAddress({...address,area:e.target.value})}/></div></div>
       <p className="text-xs text-gray-500">Booking कम से कम 30 मिनट आगे के समय के लिए करें। Provider request स्वीकार या अस्वीकार कर सकता है।</p>
       <button disabled={saving} className="w-full rounded-xl bg-green-600 py-3 font-semibold text-white disabled:opacity-60">{saving?"Booking भेजी जा रही है...":"Booking Confirm करें"}</button>
