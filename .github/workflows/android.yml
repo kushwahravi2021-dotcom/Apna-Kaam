@@ -16,6 +16,9 @@ on:
           - "no"
           - "yes"
 
+permissions:
+  contents: write
+
 jobs:
   build-android:
     runs-on: ubuntu-latest
