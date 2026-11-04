@@ -84,6 +84,8 @@ export default function LoginPage() {
           <p className="mt-1 text-sm text-gray-500">Ghar ki har zarurat, ek hi app par.</p>
         </div>
 
+        {process.env.NEXT_PUBLIC_DEMO_MODE === "true" && <div className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-3 text-left text-xs text-amber-950"><p className="font-bold">Demo provider accounts</p><p className="mt-1">Ramesh (Plumber): 9999990001</p><p>Suresh (Electrician): 9999990002</p><p>Asha (Carpenter): 9999990003</p><p className="mt-1">OTP: 123456 · Customer testing के लिए अपना कोई भी 10-digit test number इस्तेमाल करें।</p></div>}
+
         {step === "phone" ? (
           <form className="mt-9" onSubmit={sendOtp}>
             <label htmlFor="phone" className="text-sm font-semibold text-gray-800">Mobile Number</label>
