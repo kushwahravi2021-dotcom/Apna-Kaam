@@ -39,6 +39,7 @@ export async function GET() {
       address: { select: { label: true, line1: true, city: true, area: true } },
       statusHistory: { orderBy: { createdAt: "asc" }, select: { status: true, note: true, createdAt: true } },
       review: { select: { id: true, rating: true, comment: true } },
+      payment: { select: { status: true } },
     },
   });
   return NextResponse.json({ ok: true, bookings });
