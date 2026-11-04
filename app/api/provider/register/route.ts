@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
-import { readSessionToken, sessionCookieName } from "@/lib/auth";
+import { createSessionToken, readSessionToken, sessionCookieName, sessionMaxAge } from "@/lib/auth";
 
 const providerSchema = z.object({
   name: z.string().trim().min(2).max(80),
@@ -62,7 +62,15 @@ export async function POST(request: Request) {
       });
     });
 
-    return NextResponse.json({ ok: true, message: "Registration submit हो गया। Admin approval के बाद आपकी profile दिखाई जाएगी।" });
+    const response = NextResponse.json({ ok: true, message: "Registration submit हो गया। Admin approval के बाद आपकी profile दिखाई जाएगी।" });
+    response.cookies.set(sessionCookieName, createSessionToken({ id: session.userId, role: "PROVIDER" }), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge: sessionMaxAge,
+    });
+    return response;
   } catch (error) {
     console.error("Provider registration error:", error);
     return NextResponse.json({ ok: false, message: "Registration अभी submit नहीं हो सका।" }, { status: 503 });
