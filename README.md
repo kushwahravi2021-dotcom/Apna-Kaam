@@ -16,6 +16,8 @@ Apna Kaam is a mobile-first Indian local-services marketplace for customers, ser
 - In-app notifications
 - Completed-booking reviews and provider rating aggregates
 - Optional Razorpay checkout for completed bookings
+- Customer complaint submission and admin complaint handling
+- Admin booking overview and map-direction links
 - PWA manifest and offline fallback
 - CI type-check and production build workflow
 
