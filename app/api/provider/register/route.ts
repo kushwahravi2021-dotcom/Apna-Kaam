@@ -18,7 +18,9 @@ export async function POST(request: Request) {
   const cookieStore = await cookies();
   const session = readSessionToken(cookieStore.get(sessionCookieName)?.value);
   if (!session) return NextResponse.json({ ok: false, message: "पहले login करें।" }, { status: 401 });
-  if (session.role === "ADMIN") return NextResponse.json({ ok: false, message: "Admin provider registration नहीं कर सकता।" }, { status: 403 });
+  const account = await prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, role: true, providerProfile: { select: { verification: true, availability: true } } } });
+  if (!account || account.role === "ADMIN") return NextResponse.json({ ok: false, message: "इस account से provider registration की अनुमति नहीं है।" }, { status: 403 });
+  if (account.role !== "CUSTOMER" && account.role !== "PROVIDER") return NextResponse.json({ ok: false, message: "Invalid account role." }, { status: 403 });
 
   const parsed = providerSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ ok: false, message: "कृपया सभी जरूरी जानकारी सही भरें।", errors: parsed.error.flatten().fieldErrors }, { status: 400 });
@@ -45,8 +47,8 @@ export async function POST(request: Request) {
           experienceYears: data.experienceYears,
           startingPrice: data.startingPrice,
           serviceArea: data.area,
-          verification: "PENDING",
-          availability: "OFFLINE",
+          verification: account.providerProfile?.verification ?? "PENDING",
+          availability: account.providerProfile?.availability ?? "OFFLINE",
           services: { deleteMany: {}, create: data.categoryIds.map((categoryId) => ({ categoryId })) },
         },
         create: {
