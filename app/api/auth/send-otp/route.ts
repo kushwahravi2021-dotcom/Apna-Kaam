@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     if (recent && Date.now() - recent.createdAt.getTime() < 30_000) {
       return NextResponse.json({ ok: false, message: "नया OTP भेजने से पहले 30 सेकंड रुकें।" }, { status: 429 });
     }
+    await prisma.otpChallenge.deleteMany({ where: { phone } });
     const code = development ? "123456" : randomInt(100000, 1000000).toString();
     const challenge = await prisma.otpChallenge.create({ data: { phone, codeHash: hashCode(phone, code), expiresAt: new Date(Date.now() + 5 * 60 * 1000) } });
     if (!development) {
