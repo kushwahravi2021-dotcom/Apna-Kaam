@@ -15,7 +15,7 @@ export async function GET(request: Request) {
         ...(city ? { user: { city: { equals: city, mode: "insensitive" } } } : {}),
         ...(area ? { serviceArea: { contains: area, mode: "insensitive" } } : {}),
         ...(categoryId ? { services: { some: { categoryId } } } : {}),
-        ...(categoryName ? { services: { some: { category: { name: { equals: categoryName, mode: "insensitive" } } } } } : {}),
+        ...(categoryName ? { services: { some: { OR: [{ categoryId: categoryName }, { category: { name: { equals: categoryName, mode: "insensitive" } } }] } } } : {}),
       },
       orderBy: [{ rating: "desc" }, { reviewCount: "desc" }],
       take: 50,
