@@ -1,0 +1,26 @@
+"use client";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+
+type Booking = {id:string;description:string;scheduledAt:string;status:string;category:{name:string;icon:string|null};customer:{name:string|null;phone:string};address:{label:string;line1:string;city:string;area:string|null};statusHistory:{status:string;note:string|null;createdAt:string}[]};
+const actions:Record<string,{status:string;label:string}[]> = {
+  NEW:[{status:"ACCEPTED",label:"Accept"},{status:"REJECTED",label:"Reject"}],
+  ACCEPTED:[{status:"ON_THE_WAY",label:"On the way"}],
+  ON_THE_WAY:[{status:"ARRIVED",label:"Arrived"}],
+  ARRIVED:[{status:"WORK_STARTED",label:"काम शुरू करें"}],
+  WORK_STARTED:[{status:"COMPLETED",label:"काम पूरा करें"}]
+};
+export default function ProviderDashboard(){
+ const [items,setItems]=useState<Booking[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState("");const [working,setWorking]=useState("");
+ async function load(){setError("");try{const r=await fetch("/api/provider/bookings");const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.message||"Bookings लोड नहीं हुईं");setItems(d.bookings||[]);}catch(e){setError(e instanceof Error?e.message:"कुछ गलत हुआ");}finally{setLoading(false);}}
+ useEffect(()=>{load();},[]);
+ async function update(id:string,status:string){setWorking(id+status);setError("");try{const r=await fetch("/api/provider/bookings/"+id,{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({status})});const d=await r.json();if(!r.ok||!d.ok)throw new Error(d.message||"Status update नहीं हुआ");await load();}catch(e){setError(e instanceof Error?e.message:"Update नहीं हुआ");}finally{setWorking("");}}
+ return <main className="min-h-screen bg-gray-50 p-4 pb-24"><header className="flex items-center justify-between"><div><h1 className="text-2xl font-bold">Provider Dashboard</h1><p className="text-sm text-gray-500">आपकी service bookings</p></div><Link href="/provider" className="text-sm text-green-700 underline">Profile</Link></header>
+ {loading&&<p className="mt-4 rounded-xl bg-white p-4 text-sm">Bookings लोड हो रही हैं...</p>}
+ {error&&<p role="alert" className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</p>}
+ {!loading&&!error&&items.length===0&&<p className="mt-4 rounded-xl bg-white p-5 text-sm text-gray-600">अभी कोई booking नहीं है।</p>}
+ <section className="mt-4 space-y-3">{items.map(b=><article key={b.id} className="rounded-2xl border bg-white p-4 shadow-sm"><div className="flex items-start justify-between gap-2"><div><h2 className="font-bold">{b.category.icon||"🛠️"} {b.category.name}</h2><p className="mt-1 text-xs text-gray-500">Booking #{b.id.slice(-7)}</p></div><span className="rounded-full bg-blue-50 px-2 py-1 text-xs font-semibold">{b.status.replaceAll("_"," ")}</span></div>
+ <p className="mt-3 text-sm">{b.description}</p><div className="mt-3 space-y-1 text-sm text-gray-600"><p>ग्राहक: {b.customer.name||"Customer"} · {b.customer.phone}</p><p>पता: {b.address.line1}, {b.address.area||""} {b.address.city}</p><p>समय: {new Date(b.scheduledAt).toLocaleString("hi-IN")}</p></div>
+ {actions[b.status]&&<div className="mt-4 flex flex-wrap gap-2">{actions[b.status].map(a=><button key={a.status} disabled={!!working} onClick={()=>update(b.id,a.status)} className={"rounded-xl px-3 py-2 text-xs font-semibold text-white disabled:opacity-50 "+(a.status==="REJECTED"?"bg-red-600":"bg-green-600")}>{working===b.id+a.status?"Updating...":a.label}</button>)}</div>}
+ </article>)}</section></main>;
+}
