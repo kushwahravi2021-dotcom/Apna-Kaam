@@ -7,12 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum UserRole {\n  CUSTOMER\n  PROVIDER\n  ADMIN\n}
-enum ProviderVerificationStatus {\n  PENDING\n  APPROVED\n  REJECTED\n  SUSPENDED\n}
-enum ProviderAvailability {\n  AVAILABLE\n  BUSY\n  OFFLINE\n}
-enum BookingStatus {\n  NEW\n  ACCEPTED\n  ON_THE_WAY\n  ARRIVED\n  WORK_STARTED\n  COMPLETED\n  CANCELLED\n  REJECTED\n}
-enum PaymentStatus {\n  PENDING\n  AUTHORIZED\n  PAID\n  FAILED\n  REFUNDED\n  CANCELLED\n}
-enum ComplaintStatus {\n  OPEN\n  IN_PROGRESS\n  RESOLVED\n  CLOSED\n}
+enum UserRole {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+}
+enum ProviderVerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SUSPENDED
+}
+enum ProviderAvailability {
+  AVAILABLE
+  BUSY
+  OFFLINE
+}
+enum BookingStatus {
+  NEW
+  ACCEPTED
+  ON_THE_WAY
+  ARRIVED
+  WORK_STARTED
+  COMPLETED
+  CANCELLED
+  REJECTED
+}
+enum PaymentStatus {
+  PENDING
+  AUTHORIZED
+  PAID
+  FAILED
+  REFUNDED
+  CANCELLED
+}
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
 
 model User {
   id              String   @id @default(cuid())
