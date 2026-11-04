@@ -39,6 +39,7 @@ jobs:
         env:
           NEXT_PUBLIC_APP_URL: ${{ inputs.app_url }}
         run: |
+          node -e "const u = new URL(process.env.NEXT_PUBLIC_APP_URL); if (u.protocol !== \"https:\") throw new Error(\"app_url must use HTTPS\")"
           npx cap add android
           npx cap sync android
           cd android
