@@ -244,3 +244,14 @@ model ServiceArea {
   createdAt DateTime @default(now())
   @@unique([city, area])
 }
+
+model OtpChallenge {
+  id        String   @id @default(cuid())
+  phone     String
+  codeHash  String
+  expiresAt DateTime
+  attempts  Int      @default(0)
+  createdAt DateTime @default(now())
+  @@index([phone, createdAt])
+  @@index([expiresAt])
+}
