@@ -1,45 +1,41 @@
+"use client";
 import Link from "next/link";
-import { Phone, MessageCircle, Star, MapPin } from "lucide-react";
+import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-const providers = [
-  { id: "demo-1", name: "Ramesh Plumbing", service: "Plumber", rating: 4.8, reviews: 124, distance: "2.1 km", price: "₹100 से", verified: true },
-  { id: "demo-2", name: "Amit Home Services", service: "Plumber & Electrician", rating: 4.6, reviews: 89, distance: "3.4 km", price: "₹150 से", verified: true },
-  { id: "demo-3", name: "Suresh Repair", service: "Home Repair", rating: 4.5, reviews: 57, distance: "4.2 km", price: "₹120 से", verified: false }
-];
+type Provider = {
+  id: string; bio: string | null; experienceYears: number | null; startingPrice: string | number | null;
+  serviceArea: string | null; rating: number; reviewCount: number;
+  user: { name: string | null; city: string | null; area: string | null };
+  services: { category: { id: string; name: string; icon: string | null } }[];
+};
 
 export default function ProvidersPage() {
-  return (
-    <div className="min-h-screen bg-gray-50 pb-24">
-      <header className="border-b bg-white px-4 py-4">
-        <h1 className="text-xl font-bold">Nearby Providers</h1>
-        <p className="mt-1 text-sm text-gray-500">आपके आसपास उपलब्ध service providers</p>
-      </header>
-      <section className="space-y-3 p-4">
-        {providers.map((p) => (
-          <article key={p.id} className="rounded-2xl border bg-white p-4 shadow-sm">
-            <div className="flex gap-3">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-2xl">👨‍🔧</div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
-                  <h2 className="font-bold">{p.name}</h2>
-                  {p.verified && <span className="rounded-full bg-green-100 px-2 py-0.5 text-[10px] font-bold text-green-700">VERIFIED</span>}
-                </div>
-                <p className="text-sm text-gray-500">{p.service}</p>
-                <div className="mt-1 flex flex-wrap gap-3 text-xs text-gray-500">
-                  <span className="flex items-center gap-1"><Star size={13} className="fill-yellow-400 text-yellow-400" /> {p.rating} ({p.reviews})</span>
-                  <span className="flex items-center gap-1"><MapPin size={13} /> {p.distance}</span>
-                  <span>{p.price}</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-2">
-              <button className="rounded-xl border py-2 text-xs font-semibold"><Phone size={15} className="mx-auto mb-1" />Call</button>
-              <button className="rounded-xl border py-2 text-xs font-semibold"><MessageCircle size={15} className="mx-auto mb-1" />WhatsApp</button>
-              <Link href={`/bookings?provider=${p.id}`} className="rounded-xl bg-green-600 py-2 text-center text-xs font-semibold text-white">Book Now</Link>
-            </div>
-          </article>
-        ))}
-      </section>
-    </div>
-  );
+  const params = useSearchParams();
+  const service = params.get("service") || "";
+  const [providers, setProviders] = useState<Provider[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    setLoading(true); setError("");
+    fetch("/api/providers" + (service ? "?service=" + encodeURIComponent(service) : ""))
+      .then(async (r) => { const d = await r.json(); if (!r.ok || !d.ok) throw new Error(d.message || "Providers लोड नहीं हुए"); setProviders(d.providers || []); })
+      .catch((e) => setError(e instanceof Error ? e.message : "कुछ गलत हुआ"))
+      .finally(() => setLoading(false));
+  }, [service]);
+  return <main className="min-h-screen bg-gray-50 pb-24">
+    <header className="border-b bg-white px-4 py-4"><h1 className="text-xl font-bold">Service Providers</h1><p className="mt-1 text-sm text-gray-500">{service ? "चुनी हुई service के उपलब्ध providers" : "सभी उपलब्ध और approved providers"}</p></header>
+    <section className="space-y-3 p-4">
+      {loading && <p className="rounded-xl bg-white p-4 text-sm text-gray-500">Providers खोज रहे हैं...</p>}
+      {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}। Database connection और seed data जाँचें।</p>}
+      {!loading && !error && providers.length === 0 && <div className="rounded-2xl bg-white p-5 text-center"><p className="font-semibold">अभी कोई provider उपलब्ध नहीं है</p><p className="mt-1 text-sm text-gray-500">दूसरी service देखें या बाद में कोशिश करें।</p><Link href="/services" className="mt-4 inline-block rounded-xl bg-green-600 px-4 py-2 text-sm font-semibold text-white">Services देखें</Link></div>}
+      {providers.map((p) => <article key={p.id} className="rounded-2xl border bg-white p-4 shadow-sm">
+        <div className="flex items-start gap-3"><div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-green-100 text-2xl">👨‍🔧</div><div className="min-w-0 flex-1"><h2 className="font-bold">{p.user.name || "Service Provider"}</h2><p className="text-sm text-gray-500">{[p.user.area, p.user.city].filter(Boolean).join(", ") || p.serviceArea || "Location उपलब्ध नहीं"}</p><p className="mt-1 text-xs text-gray-600">⭐ {p.rating.toFixed(1)} · {p.reviewCount} reviews · {p.experienceYears ?? 0} साल अनुभव</p></div></div>
+        {p.bio && <p className="mt-3 text-sm text-gray-600">{p.bio}</p>}
+        <div className="mt-3 flex flex-wrap gap-2">{p.services.map(({category}) => <span key={category.id} className="rounded-full bg-gray-100 px-3 py-1 text-xs">{category.icon || "🛠️"} {category.name}</span>)}</div>
+        <p className="mt-3 text-sm font-semibold">शुरुआती फीस: {p.startingPrice == null ? "बात करके तय करें" : "₹" + Number(p.startingPrice).toLocaleString("en-IN")}</p>
+        <div className="mt-4 flex flex-wrap gap-2">{p.services.map(({category}) => <Link key={category.id} href={"/book?providerId=" + encodeURIComponent(p.id) + "&categoryId=" + encodeURIComponent(category.id)} className="rounded-xl bg-green-600 px-3 py-2 text-xs font-semibold text-white">Book {category.name}</Link>)}</div>
+      </article>)}
+    </section>
+  </main>;
 }
