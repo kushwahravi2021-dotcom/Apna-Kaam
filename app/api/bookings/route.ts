@@ -57,7 +57,7 @@ export async function POST(request: Request) {
   try {
     const provider = await prisma.providerProfile.findFirst({
       where: { id: data.providerId, verification: "APPROVED", availability: "AVAILABLE", services: { some: { categoryId: data.categoryId } } },
-      select: { id: true },
+      select: { id: true, userId: true },
     });
     if (!provider) return NextResponse.json({ ok: false, message: "यह provider इस service के लिए अभी उपलब्ध नहीं है।" }, { status: 404 });
     const booking = await prisma.$transaction(async (tx) => {
@@ -69,12 +69,11 @@ export async function POST(request: Request) {
           customerId: user.id, providerId: provider.id, categoryId: data.categoryId, addressId: address.id,
           description: data.description, scheduledAt,
           statusHistory: { create: { status: "NEW", note: "Customer ने booking request भेजी।" } },
-          notifications: undefined,
         },
         select: { id: true, status: true, scheduledAt: true },
       });
       await tx.notification.create({
-        data: { userId: (await tx.providerProfile.findUniqueOrThrow({ where: { id: provider.id }, select: { userId: true } })).userId, title: "नई booking", body: "आपको एक नई service booking मिली है।" },
+        data: { userId: provider.userId, title: "नई booking", body: "आपको एक नई service booking मिली है।" },
       });
       return created;
     });
