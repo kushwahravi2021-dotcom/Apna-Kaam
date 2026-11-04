@@ -30,7 +30,8 @@ Set `DEMO_MODE=true` and `NEXT_PUBLIC_DEMO_MODE=true` in the demo deployment. De
 1. Create a free Neon PostgreSQL project and copy its connection string as `DATABASE_URL`.
 2. Import this GitHub repository into Vercel.
 3. Before the first deployment, add these Vercel Environment Variables for **Production**:
-   - `DATABASE_URL`: Neon PostgreSQL connection string.
+   - `DATABASE_URL`: Neon pooled PostgreSQL connection string (select the pooled option in Neon Connect).
+   - `DIRECT_URL`: Neon direct PostgreSQL connection string (turn pooled off in Neon Connect). Prisma uses this for schema setup while the app uses the pooled URL.
    - `AUTH_SECRET`: a random secret of at least 32 characters (generate one with `openssl rand -base64 32`).
    - `DEMO_MODE`: `true`.
    - `NEXT_PUBLIC_DEMO_MODE`: `true`.
