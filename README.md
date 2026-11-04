@@ -38,7 +38,8 @@ cp .env.example .env
 Set `DATABASE_URL` and a random `AUTH_SECRET` of at least 32 characters, then run:
 
 ```bash
-npx prisma migrate deploy
+npx prisma db push
+npx prisma migrate resolve --applied 20261104150000_add_otp_challenge
 npx prisma generate
 npx prisma db seed
 npm run dev
@@ -50,7 +51,7 @@ Open http://localhost:3000.
 
 - `DATABASE_URL`: PostgreSQL connection string.
 - `AUTH_SECRET`: long random secret used for session and OTP HMAC signatures.
-- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`: Twilio SMS sender settings. Production OTP sending fails closed when these are missing. Development uses OTP `123456`.
+- `TWILIO_ACCOUNT_SID`, `TWILIO_AUTH_TOKEN`, `TWILIO_FROM_NUMBER`: Twilio SMS sender settings. Production OTP sending fails closed when these are missing. Development uses OTP `123456`. OTP challenges are stored in PostgreSQL, expire after five minutes and allow five attempts.
 - `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`: Razorpay test/live keys. Payment is unavailable until configured.
 - `ADMIN_PHONE`: 10-digit phone number used by the seed script to bootstrap an admin account. Admin still signs in using OTP.
 - `NEXT_PUBLIC_APP_URL`: HTTPS deployment URL used by the Android wrapper workflow.
@@ -58,9 +59,9 @@ Open http://localhost:3000.
 
 Never commit real secrets.
 
-## Android APK
+## Install on Android (PWA)\n\nAfter deployment over HTTPS, open the website in Chrome on Android and use the browser menu to install Apna Kaam. The PWA includes an offline fallback page; authenticated/API data still requires an internet connection.\n\n## Android APK
 
-The app must first be deployed to an HTTPS URL and have its production environment configured. The repository contains a manually triggered Android build workflow; provide the deployed URL as its `app_url` input. The workflow builds a Capacitor Android wrapper and uploads a debug APK artifact. A signed production APK/AAB requires Android signing credentials and is not generated from this repository automatically.
+The app must first be deployed to an HTTPS URL and have its production environment configured. In GitHub, open Actions → Android APK → Run workflow and provide the deployed URL as `app_url`. The workflow builds a Capacitor Android wrapper and uploads a debug APK artifact for 30 days. You may optionally publish a prerelease GitHub Release. This is a debug APK, not a Play Store-ready signed production build; a signed production APK/AAB requires Android signing credentials.
 
 ## Important production checks
 
