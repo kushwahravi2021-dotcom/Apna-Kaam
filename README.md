@@ -21,7 +21,22 @@ Apna Kaam is a mobile-first Indian local-services marketplace for customers, ser
 - PWA manifest and offline fallback
 - CI type-check and production build workflow
 
-## Demo testing mode (before official launch)\n\nSet `DEMO_MODE=true` and `NEXT_PUBLIC_DEMO_MODE=true` in the demo deployment. Demo mode uses the fixed OTP `123456` even on a hosted deployment, does not send SMS, disables online payments, and displays a visible demo warning. This is intentionally insecure for testing only: use a separate demo database, fake/sample contact details, and never store real customer/payment information. Run `npx prisma db seed` after enabling demo mode to create sample providers. Sample provider logins: Ramesh `9999990001`, Suresh `9999990002`, Asha `9999990003`; all use OTP `123456`. Any other test phone can create a customer account. Configure `ADMIN_PHONE` before seeding if an admin dashboard is needed. Turn both demo flags off and configure Twilio/Razorpay before official launch.\n\n## Requirements
+## Demo testing mode (before official launch)\n\nSet `DEMO_MODE=true` and `NEXT_PUBLIC_DEMO_MODE=true` in the demo deployment. Demo mode uses the fixed OTP `123456` even on a hosted deployment, does not send SMS, disables online payments, and displays a visible demo warning. This is intentionally insecure for testing only: use a separate demo database, fake/sample contact details, and never store real customer/payment information. Run `npx prisma db seed` after enabling demo mode to create sample providers. Sample provider logins: Ramesh `9999990001`, Suresh `9999990002`, Asha `9999990003`; all use OTP `123456`. Any other test phone can create a customer account. Configure `ADMIN_PHONE` before seeding if an admin dashboard is needed. Turn both demo flags off and configure Twilio/Razorpay before official launch.\n\n## Deploy a demo (Vercel + Neon)
+
+1. Create a free Neon PostgreSQL project and copy its connection string as `DATABASE_URL`.
+2. Import this GitHub repository into Vercel.
+3. Before the first deployment, add these Vercel Environment Variables for **Production**:
+   - `DATABASE_URL`: Neon PostgreSQL connection string.
+   - `AUTH_SECRET`: a random secret of at least 32 characters (generate one with `openssl rand -base64 32`).
+   - `DEMO_MODE`: `true`.
+   - `NEXT_PUBLIC_DEMO_MODE`: `true`.
+   - `ADMIN_PHONE`: optional 10-digit mobile number for the demo administrator.
+4. Deploy. The included `vercel.json` runs `prisma db push` before the Next.js build to initialize the demo database.
+5. After the first deployment, open the Vercel project terminal or use a trusted local shell with the same `DATABASE_URL` and run `npx prisma db seed` once to add sample categories and demo providers.
+
+Do not share the database URL or `AUTH_SECRET) in chat or commit them to Git. Demo mode is deliberately insecure and must only use a separate test database.
+
+## Requirements
 
 - Node.js 20+
 - npm
