@@ -37,10 +37,11 @@ export async function PATCH(request: Request) {
   const { providerId, decision } = parsed.data;
   try {
     const result = await prisma.$transaction(async (tx) => {
-      const provider = await tx.providerProfile.findUnique({ where: { id: providerId }, select: { id: true, verification: true } });
+      const provider = await tx.providerProfile.findUnique({ where: { id: providerId }, select: { id: true, userId: true, verification: true } });
       if (!provider || provider.verification !== "PENDING") return null;
       const updated = await tx.providerProfile.update({ where: { id: providerId }, data: { verification: decision } });
       await tx.adminAction.create({ data: { adminId, action: decision === "APPROVED" ? "PROVIDER_APPROVED" : "PROVIDER_REJECTED", targetType: "ProviderProfile", targetId: providerId } });
+      await tx.notification.create({ data: { userId: provider.userId, title: decision === "APPROVED" ? "Provider profile approved" : "Provider application update", body: decision === "APPROVED" ? "आपकी profile approve हो गई है। अब dashboard से Available हो सकते हैं।" : "आपकी provider application approve नहीं हुई। कृपया support से संपर्क करें।" } });
       return updated;
     });
     if (!result) return NextResponse.json({ ok: false, message: "Pending provider नहीं मिला।" }, { status: 404 });
