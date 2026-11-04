@@ -13,7 +13,8 @@ export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const phone = normalizePhone(String(body.phone ?? ""));
   if (!phone) return NextResponse.json({ ok: false, message: "10 अंकों का सही mobile number डालें।" }, { status: 400 });
-  const development = process.env.NODE_ENV !== "production";
+  const demoMode = process.env.DEMO_MODE === "true";
+  const development = process.env.NODE_ENV !== "production" || demoMode;
   const accountSid = process.env.TWILIO_ACCOUNT_SID;
   const authToken = process.env.TWILIO_AUTH_TOKEN;
   const fromNumber = process.env.TWILIO_FROM_NUMBER;
