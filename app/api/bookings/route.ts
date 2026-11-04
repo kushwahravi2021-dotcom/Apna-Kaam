@@ -14,6 +14,8 @@ const bookingSchema = z.object({
     line1: z.string().trim().min(5).max(250),
     city: z.string().trim().min(2).max(80),
     area: z.string().trim().max(100).optional().default(""),
+    latitude: z.number().min(-90).max(90).optional().nullable(),
+    longitude: z.number().min(-180).max(180).optional().nullable(),
   }),
 });
 
@@ -36,7 +38,7 @@ export async function GET() {
       id: true, description: true, scheduledAt: true, status: true, createdAt: true,
       category: { select: { name: true, icon: true } },
       provider: { select: { user: { select: { name: true, phone: true } } } },
-      address: { select: { label: true, line1: true, city: true, area: true } },
+      address: { select: { label: true, line1: true, city: true, area: true, latitude: true, longitude: true } },
       statusHistory: { orderBy: { createdAt: "asc" }, select: { status: true, note: true, createdAt: true } },
       review: { select: { id: true, rating: true, comment: true } },
       payment: { select: { status: true } },
@@ -64,7 +66,7 @@ export async function POST(request: Request) {
     if (!provider) return NextResponse.json({ ok: false, message: "यह provider इस service के लिए अभी उपलब्ध नहीं है।" }, { status: 404 });
     const booking = await prisma.$transaction(async (tx) => {
       const address = await tx.address.create({
-        data: { userId: user.id, label: data.address.label, line1: data.address.line1, city: data.address.city, area: data.address.area || "" },
+        data: { userId: user.id, label: data.address.label, line1: data.address.line1, city: data.address.city, area: data.address.area || "", latitude: data.address.latitude ?? undefined, longitude: data.address.longitude ?? undefined },
       });
       const created = await tx.booking.create({
         data: {
