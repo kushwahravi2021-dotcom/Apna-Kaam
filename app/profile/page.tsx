@@ -35,6 +35,7 @@ export default function ProfilePage() {
       {message && <p role="status" className="rounded-xl bg-green-50 p-3 text-sm text-green-800">{message}</p>}
       {error && <p role="alert" className="rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       <Link href="/notifications" className="flex items-center justify-between rounded-2xl border bg-white p-4 shadow-sm"><span>🔔 Notifications</span><span className="text-gray-400">›</span></Link>
+      <Link href="/support" className="flex items-center justify-between rounded-2xl border bg-white p-4 shadow-sm"><span>🆘 Help & Support</span><span className="text-gray-400">›</span></Link>
       {user?.role === "PROVIDER" && <Link href="/provider/dashboard" className="flex items-center justify-between rounded-2xl border bg-white p-4 shadow-sm"><span>🧰 Provider Dashboard</span><span className="text-gray-400">›</span></Link>}
       {user?.role === "ADMIN" && <Link href="/admin" className="flex items-center justify-between rounded-2xl border bg-white p-4 shadow-sm"><span>⚙️ Admin Dashboard</span><span className="text-gray-400">›</span></Link>}
       {user && <button onClick={logout} className="w-full rounded-2xl border border-red-200 bg-white p-4 text-left font-semibold text-red-700">Logout</button>}
