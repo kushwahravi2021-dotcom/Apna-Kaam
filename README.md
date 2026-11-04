@@ -21,7 +21,11 @@ Apna Kaam is a mobile-first Indian local-services marketplace for customers, ser
 - PWA manifest and offline fallback
 - CI type-check and production build workflow
 
-## Demo testing mode (before official launch)\n\nSet `DEMO_MODE=true` and `NEXT_PUBLIC_DEMO_MODE=true` in the demo deployment. Demo mode uses the fixed OTP `123456` even on a hosted deployment, does not send SMS, disables online payments, and displays a visible demo warning. This is intentionally insecure for testing only: use a separate demo database, fake/sample contact details, and never store real customer/payment information. Run `npx prisma db seed` after enabling demo mode to create sample providers. Sample provider logins: Ramesh `9999990001`, Suresh `9999990002`, Asha `9999990003`; all use OTP `123456`. Any other test phone can create a customer account. Configure `ADMIN_PHONE` before seeding if an admin dashboard is needed. Turn both demo flags off and configure Twilio/Razorpay before official launch.\n\n## Deploy a demo (Vercel + Neon)
+## Demo testing mode (before official launch)
+
+Set `DEMO_MODE=true` and `NEXT_PUBLIC_DEMO_MODE=true` in the demo deployment. Demo mode uses the fixed OTP `123456` even on a hosted deployment, does not send SMS, disables online payments, and displays a visible demo warning. This is intentionally insecure for testing only: use a separate demo database, fake/sample contact details, and never store real customer/payment information. Run `npx prisma db seed` after enabling demo mode to create sample providers. Sample provider logins: Ramesh `9999990001`, Suresh `9999990002`, Asha `9999990003`; all use OTP `123456`. Any other test phone can create a customer account. Configure `ADMIN_PHONE` before seeding if an admin dashboard is needed. Turn both demo flags off and configure Twilio/Razorpay before official launch.
+
+## Deploy a demo (Vercel + Neon)
 
 1. Create a free Neon PostgreSQL project and copy its connection string as `DATABASE_URL`.
 2. Import this GitHub repository into Vercel.
@@ -34,7 +38,7 @@ Apna Kaam is a mobile-first Indian local-services marketplace for customers, ser
 4. Deploy. The included `vercel.json` runs `prisma db push` before the Next.js build to initialize the demo database.
 5. The build automatically seeds the service categories and (when demo mode is enabled) sample providers.
 
-Do not share the database URL or `AUTH_SECRET) in chat or commit them to Git. Demo mode is deliberately insecure and must only use a separate test database.
+Do not share the database URL or `AUTH_SECRET` in chat or commit them to Git. Demo mode is deliberately insecure and must only use a separate test database.
 
 ## Requirements
 
@@ -76,7 +80,11 @@ Open http://localhost:3000.
 
 Never commit real secrets.
 
-## Install on Android (PWA)\n\nAfter deployment over HTTPS, open the website in Chrome on Android and use the browser menu to install Apna Kaam. The PWA includes an offline fallback page; authenticated/API data still requires an internet connection.\n\n## Android APK
+## Install on Android (PWA)
+
+After deployment over HTTPS, open the website in Chrome on Android and use the browser menu to install Apna Kaam. The PWA includes an offline fallback page; authenticated/API data still requires an internet connection.
+
+## Android APK
 
 The app must first be deployed to an HTTPS URL and have its production environment configured. In GitHub, open Actions → Android APK → Run workflow and provide the deployed URL as `app_url`. The workflow builds a Capacitor Android wrapper and uploads a debug APK artifact for 30 days. You may optionally publish a prerelease GitHub Release. This is a debug APK, not a Play Store-ready signed production build; a signed production APK/AAB requires Android signing credentials.
 
