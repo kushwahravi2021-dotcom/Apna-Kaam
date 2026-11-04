@@ -56,6 +56,7 @@ model ProviderProfile {
   services       ProviderService[]
   bookings       Booking[]                  @relation("ProviderBookings")
   reviews        Review[]
+  favorites      Favorite[]
   createdAt      DateTime                   @default(now())
   updatedAt      DateTime                   @updatedAt
 }
@@ -67,6 +68,7 @@ model Category {
   groupName   String
   active      Boolean           @default(true)
   services    ProviderService[]
+  bookings    Booking[]
   createdAt   DateTime          @default(now())
   updatedAt   DateTime          @updatedAt
 }
@@ -112,6 +114,7 @@ model Booking {
   statusHistory   BookingStatusHistory[]
   review          Review?
   payment         Payment?
+  complaints      Complaint[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
   @@index([customerId, createdAt])
@@ -161,6 +164,7 @@ model Complaint {
   description String
   status      ComplaintStatus @default(OPEN)
   maker       User            @relation("ComplaintMaker", fields: [makerId], references: [id])
+  booking     Booking?        @relation(fields: [bookingId], references: [id])
   createdAt   DateTime        @default(now())
   updatedAt   DateTime        @updatedAt
   @@index([status, createdAt])
