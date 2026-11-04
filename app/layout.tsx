@@ -14,6 +14,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="hi">
       <body>
+        {process.env.DEMO_MODE === "true" && <div className="bg-amber-300 px-3 py-2 text-center text-xs font-bold text-amber-950">DEMO TESTING MODE · असली payment/SMS बंद हैं · कृपया वास्तविक निजी जानकारी न डालें</div>}
         <ServiceWorkerRegister />
         <main className="mx-auto min-h-screen w-full max-w-md bg-white shadow-sm">{children}</main>
         <BottomNav />
