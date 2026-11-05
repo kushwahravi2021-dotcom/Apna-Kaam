@@ -49,7 +49,7 @@ export default function ProviderPage() {
       const r = await fetch("/api/provider/register", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...form, experienceYears: Number(form.experienceYears), startingPrice: Number(form.startingPrice), categoryIds: selected }) });
       const d = await r.json();
       if (!r.ok || !d.ok) throw new Error(d.message || "Registration नहीं हुआ");
-      setMessage(d.message || "Registration submit हो गया। अब payment details Settings में भर सकते हैं।");
+      setMessage(d.message || "Registration submit हो गया। Payment details बाद में Provider Settings में भर सकते हैं।");
     } catch (e) { setError(e instanceof Error ? e.message : "कुछ गलत हुआ"); } finally { setBusy(false); }
   }
 
@@ -70,7 +70,6 @@ export default function ProviderPage() {
         <div className="sm:col-span-2"><label className="text-sm font-semibold">काम का विवरण</label><textarea maxLength={500} rows={3} className={input} value={form.bio} onChange={e => change("bio", e.target.value)} /></div>
       </div><fieldset className="mt-4"><legend className="text-sm font-semibold">आप कौन-सी services देते हैं?</legend><div className="mt-2 grid gap-2 sm:grid-cols-2">{services.map(s => <label key={s.id} className="flex items-center gap-2 rounded-xl border p-3 text-sm"><input type="checkbox" checked={selected.includes(s.id)} onChange={() => setSelected(old => old.includes(s.id) ? old.filter(x => x !== s.id) : [...old, s.id])} />{s.icon || "🛠️"} {s.name}</label>)}</div></fieldset></section>
       <section><h2 className="font-black">Verification</h2><p className="mt-1 text-xs text-gray-500">Admin verification के लिए अपना ID proof upload करें।</p><div className="mt-3"><label className="text-sm font-semibold">Document / ID proof</label><input type="file" accept="image/jpeg,image/png,application/pdf" className={input} onChange={e => upload("document", e)} /><p className="mt-1 text-xs text-gray-500">JPG/PNG/PDF · max 4 MB</p>{form.verificationDocumentUrl && <p className="mt-2 text-xs font-semibold text-green-700">✓ ID proof upload हो गया</p>}</div></section>
-      <div className="rounded-xl bg-blue-50 p-3 text-sm text-blue-900"><b>Payment details</b><br />UPI / Bank details registration के बाद <Link className="font-bold underline" href="/provider/settings">Settings</Link> में भरें।</div>
       <button disabled={busy || !!uploading} className="w-full rounded-xl bg-green-600 py-3 font-semibold text-white disabled:opacity-60">{busy ? "Submit हो रहा है..." : "Provider Registration Submit करें"}</button>
       {message && <p role="status" className="rounded-lg bg-green-50 p-3 text-sm text-green-800">{message}</p>}{error && <p role="alert" className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</p>}
     </form>
