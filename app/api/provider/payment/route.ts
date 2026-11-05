@@ -42,7 +42,20 @@ export async function PATCH(request: Request) {
   if (!parsed.success) return NextResponse.json({ ok: false, message: "Payment details सही भरें।" }, { status: 400 });
   const data = parsed.data;
   if (!user.providerProfile) return NextResponse.json({ ok: false, message: "Provider profile नहीं मिला." }, { status: 404 });
-  const updated = await prisma.providerProfile.update({ where: { id: user.providerProfile.id }, data: { upiId: data.upiId || null, bankAccountName: data.bankAccountName || null, bankAccountNumber: data.bankAccountNumber || null, bankIfsc: data.bankIfsc || null }, select: { upiId: true, bankAccountName: true, bankAccountNumber: true, bankIfsc: true } });
+  const bankAccountNumber =
+    data.bankAccountNumber.startsWith("••••")
+      ? user.providerProfile.bankAccountNumber
+      : data.bankAccountNumber || null;
+  const updated = await prisma.providerProfile.update({
+    where: { id: user.providerProfile.id },
+    data: {
+      upiId: data.upiId || null,
+      bankAccountName: data.bankAccountName || null,
+      bankAccountNumber,
+      bankIfsc: data.bankIfsc || null,
+    },
+    select: { upiId: true, bankAccountName: true, bankAccountNumber: true, bankIfsc: true }
+  });
   return NextResponse.json({
     ok: true,
     payment: {
