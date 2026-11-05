@@ -6,6 +6,7 @@ import { createSessionToken, readSessionToken, sessionCookieName, sessionMaxAge 
 
 const providerSchema = z.object({
   name: z.string().trim().min(2).max(80),
+  email: z.string().trim().email().max(120).optional().or(z.literal("")).default(""),
   city: z.string().trim().min(2).max(80),
   area: z.string().trim().min(2).max(100),
   bio: z.string().trim().max(500).optional().default(""),
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
     await prisma.$transaction(async tx => {
       await tx.user.update({
         where: { id: session.userId },
-        data: { name: data.name, city: data.city, area: data.area, role: "PROVIDER", avatarUrl: data.avatarUrl || null },
+        data: { name: data.name, email: data.email || null, city: data.city, area: data.area, role: "PROVIDER", avatarUrl: data.avatarUrl || null },
       });
       await tx.providerProfile.upsert({
         where: { userId: session.userId },
