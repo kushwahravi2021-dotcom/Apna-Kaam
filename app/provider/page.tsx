@@ -8,7 +8,7 @@ type Service = { id: string; name: string; icon: string | null };
 export default function ProviderPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
-  const [form, setForm] = useState({ name: "", city: "Ganj Basoda", area: "", bio: "", experienceYears: "0", startingPrice: "", avatarUrl: "", verificationDocumentUrl: "" });
+  const [form, setForm] = useState({ name: "", email: "", city: "Ganj Basoda", area: "", bio: "", experienceYears: "0", startingPrice: "", avatarUrl: "", verificationDocumentUrl: "" });
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<"photo" | "document" | "">("");
   const [message, setMessage] = useState("");
