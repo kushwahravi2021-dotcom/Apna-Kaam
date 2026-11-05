@@ -16,7 +16,7 @@ const schema = z.object({
   providerId: z.string().min(1),
   name: z.string().trim().min(2).max(80),
   email: z.string().trim().email().max(120).optional().or(z.literal("")).default(""),
-  phone: z.string().trim().regex(/^\\+?[0-9]{10,15}$/),
+  phone: z.string().trim().regex(/^\+?[0-9]{10,15}$/),
   city: z.string().trim().min(2).max(80),
   area: z.string().trim().max(100).optional().default(""),
   serviceArea: z.string().trim().max(100).optional().default(""),
@@ -51,8 +51,14 @@ export async function PATCH(request: Request) {
   if (!parsed.success) return NextResponse.json({ ok: false, message: "Provider details सही भरें।", errors: parsed.error.flatten().fieldErrors }, { status: 400 });
   const d = parsed.data;
   try {
-    const existing = await prisma.user.findFirst({ where: { phone: d.phone, NOT: { id: (await prisma.providerProfile.findUnique({ where: { id: d.providerId }, select: { userId: true } }))?.userId } }, select: { id: true } });
+    const providerOwner = await prisma.providerProfile.findUnique({ where: { id: d.providerId }, select: { userId: true } });
+    if (!providerOwner) return NextResponse.json({ ok: false, message: "Provider नहीं मिला।" }, { status: 404 });
+    const existing = await prisma.user.findFirst({ where: { phone: d.phone, NOT: { id: providerOwner.userId } }, select: { id: true } });
     if (existing) return NextResponse.json({ ok: false, message: "यह mobile number किसी दूसरे account में है।" }, { status: 409 });
+    if (d.email) {
+      const emailOwner = await prisma.user.findFirst({ where: { email: d.email, NOT: { id: providerOwner.userId } }, select: { id: true } });
+      if (emailOwner) return NextResponse.json({ ok: false, message: "यह email किसी दूसरे account में है।" }, { status: 409 });
+    }
     const provider = await prisma.providerProfile.update({
       where: { id: d.providerId },
       data: {
