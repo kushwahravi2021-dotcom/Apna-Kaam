@@ -5,6 +5,8 @@ import { normalizePhone } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
+type RequestedRole = "customer" | "provider" | "admin";
+
 function placeholderHash(phone: string) {
   const secret = process.env.AUTH_SECRET;
   if (!secret || secret.length < 32) throw new Error("AUTH_SECRET must contain at least 32 characters.");
@@ -14,19 +16,32 @@ function placeholderHash(phone: string) {
 export async function POST(request: Request) {
   const body = await request.json().catch(() => ({}));
   const phone = normalizePhone(String(body.phone ?? ""));
-  if (!phone) return NextResponse.json({ ok: false, message: "10 अंकों का सही mobile number डालें।" }, { status: 400 });
+  const role = String(body.role ?? "customer") as RequestedRole;
+  if (!phone || !["customer", "provider", "admin"].includes(role)) {
+    return NextResponse.json({ ok: false, message: "Mobile number और role जरूरी है।" }, { status: 400 });
+  }
 
   const demoMode = process.env.DEMO_MODE === "true";
   const development = process.env.NODE_ENV !== "production" || demoMode;
-  const accountSid = process.env.TWILIO_ACCOUNT_SID;
-  const authToken = process.env.TWILIO_AUTH_TOKEN;
-  const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
-
-  if (!development && (!accountSid || !authToken || !verifyServiceSid)) {
-    return NextResponse.json({ ok: false, message: "OTP Verify service configure नहीं है।" }, { status: 503 });
-  }
+  const adminPhone = normalizePhone(String(process.env.ADMIN_PHONE ?? ""));
 
   try {
+    const existing = await prisma.user.findUnique({ where: { phone }, select: { role: true } });
+    if (role === "admin" && phone !== adminPhone) {
+      return NextResponse.json({ ok: false, message: "यह मोबाइल नंबर Admin account के लिए authorized नहीं है।" }, { status: 403 });
+    }
+    if (existing && existing.role !== role.toUpperCase()) {
+      return NextResponse.json({ ok: false, message: `यह नंबर पहले से ${existing.role} account है। कृपया उसी role से login करें।` }, { status: 409 });
+    }
+
+    const accountSid = process.env.TWILIO_ACCOUNT_SID;
+    const authToken = process.env.TWILIO_AUTH_TOKEN;
+    const verifyServiceSid = process.env.TWILIO_VERIFY_SERVICE_SID;
+
+    if (!development && (!accountSid || !authToken || !verifyServiceSid)) {
+      return NextResponse.json({ ok: false, message: "OTP Verify service configure नहीं है।" }, { status: 503 });
+    }
+
     const recent = await prisma.otpChallenge.findFirst({
       where: { phone },
       orderBy: { createdAt: "desc" },
