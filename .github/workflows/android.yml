@@ -107,3 +107,5 @@ jobs:
             dist/apna-kaam.apk
             dist/apna-kaam.aab
             dist/apna-kaam.apk.sha256
+
+# Rebuild Android with latest main branch changes.
