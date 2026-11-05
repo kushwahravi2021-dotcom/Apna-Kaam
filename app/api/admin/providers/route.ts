@@ -55,7 +55,7 @@ export async function PATCH(request: Request) {
     const result = await prisma.$transaction(async (tx) => {
       const provider = await tx.providerProfile.findUnique({
         where: { id: providerId },
-        select: { id: true, userId: true, verification: true, availability: true, user: { select: { name: true, phone: true } } },
+        select: { id: true, userId: true, verification: true, availability: true, deletedAt: true, user: { select: { name: true, phone: true } } },
       });
       if (!provider) return { kind: "missing" as const };
 
@@ -145,9 +145,7 @@ export async function PATCH(request: Request) {
     });
 
     if (result.kind === "missing") return NextResponse.json({ ok: false, message: "Provider नहीं मिला।" }, { status: 404 });
-    if (result.kind === "protected") return NextResponse.json({ ok: false, message: "इस provider के bookings/reviews मौजूद हैं, इसलिए अभी hard delete नहीं किया जा सकता। पहले account deactivate/block करें।" }, { status: 409 });
     if (result.kind === "invalid") return NextResponse.json({ ok: false, message: result.message }, { status: 409 });
-    if (result.kind === "deleted") return NextResponse.json({ ok: true, message: "Provider delete हो गया।" });
     return NextResponse.json({ ok: true, message: "Provider status update हो गया।", provider: result.provider });
   } catch (error) {
     console.error("Admin provider action error:", error);
