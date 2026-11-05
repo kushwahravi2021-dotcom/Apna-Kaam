@@ -10,9 +10,14 @@ async function currentUser() {
   return prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, phone: true, email: true, role: true, name: true, city: true, area: true, avatarUrl: true } });
 }
 export async function GET() {
-  const user = await currentUser();
-  if (!user) return NextResponse.json({ ok: false, message: "पहले login करें।" }, { status: 401 });
-  return NextResponse.json({ ok: true, user });
+  try {
+    const user = await currentUser();
+    if (!user) return NextResponse.json({ ok: false, message: "पहले login करें।" }, { status: 401 });
+    return NextResponse.json({ ok: true, user });
+  } catch (error) {
+    console.error("Profile load error:", error);
+    return NextResponse.json({ ok: false, message: "Profile service अभी उपलब्ध नहीं है। कृपया फिर से login करें।" }, { status: 503 });
+  }
 }
 const schema = z.object({
   name: z.string().trim().min(2).max(80),
