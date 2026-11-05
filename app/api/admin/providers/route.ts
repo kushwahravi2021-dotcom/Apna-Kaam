@@ -26,6 +26,79 @@ const providerSelect = {
   services: { select: { category: { select: { id: true, name: true, icon: true } } } },
 } as const;
 
+const createProviderSchema = z.object({
+  name: z.string().trim().min(2).max(80),
+  phone: z.string().trim().regex(/^\\+?[0-9]{10,15}$/),
+  email: z.string().trim().email().max(120).optional().or(z.literal("")).default(""),
+  city: z.string().trim().min(2).max(80),
+  area: z.string().trim().max(100).optional().default(""),
+  serviceArea: z.string().trim().max(100).optional().default(""),
+  bio: z.string().trim().max(500).optional().default(""),
+  experienceYears: z.coerce.number().int().min(0).max(60).default(0),
+  startingPrice: z.coerce.number().positive().max(1000000),
+  categoryId: z.string().min(1),
+});
+
+export async function POST(request: Request) {
+  const adminId = await requireAdmin();
+  if (!adminId) return NextResponse.json({ ok: false, message: "Admin access required." }, { status: 403 });
+
+  const parsed = createProviderSchema.safeParse(await request.json().catch(() => null));
+  if (!parsed.success) {
+    return NextResponse.json({ ok: false, message: "Provider details सही भरें।", errors: parsed.error.flatten().fieldErrors }, { status: 400 });
+  }
+
+  const d = parsed.data;
+  try {
+    const existing = await prisma.user.findUnique({ where: { phone: d.phone }, select: { id: true, role: true } });
+    if (existing) {
+      return NextResponse.json({ ok: false, message: "यह mobile number पहले से registered है।" }, { status: 409 });
+    }
+    const category = await prisma.category.findFirst({ where: { id: d.categoryId, active: true }, select: { id: true, name: true } });
+    if (!category) return NextResponse.json({ ok: false, message: "Service category नहीं मिली।" }, { status: 400 });
+
+    const created = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          phone: d.phone,
+          email: d.email || null,
+          role: "PROVIDER",
+          name: d.name,
+          city: d.city,
+          area: d.area || null,
+          providerProfile: {
+            create: {
+              bio: d.bio || null,
+              experienceYears: d.experienceYears,
+              startingPrice: d.startingPrice,
+              serviceArea: d.serviceArea || null,
+              verification: "APPROVED",
+              availability: "OFFLINE",
+              services: { create: { categoryId: d.categoryId } },
+            },
+          },
+        },
+        select: { id: true, phone: true, name: true, role: true, providerProfile: { select: { id: true } } },
+      });
+      await tx.adminAction.create({
+        data: {
+          adminId,
+          action: "PROVIDER_CREATED_BY_ADMIN",
+          targetType: "ProviderProfile",
+          targetId: user.providerProfile?.id,
+          metadata: { phone: user.phone, categoryId: category.id, categoryName: category.name },
+        },
+      });
+      return user;
+    });
+
+    return NextResponse.json({ ok: true, message: "Provider add हो गया। अब वह अपने mobile number से OTP लेकर login कर सकता है।", provider: created }, { status: 201 });
+  } catch (error) {
+    console.error("Admin create provider:", error);
+    return NextResponse.json({ ok: false, message: "Provider create नहीं हो सका।" }, { status: 503 });
+  }
+}
+
 export async function GET() {
   const adminId = await requireAdmin();
   if (!adminId) return NextResponse.json({ ok: false, message: "Admin access required." }, { status: 403 });
