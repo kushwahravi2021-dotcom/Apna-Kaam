@@ -3,7 +3,12 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 
 const DATE = "04Nov2026";
-const ASSETS = {\n  "villages.04Nov2026.csv.7z": "https://api.github.com/repos/ramSeraph/opendata/releases/assets/708673215",\n  "urban_local_bodies.04Nov2026.csv.7z": "https://api.github.com/repos/ramSeraph/opendata/releases/assets/708649438",\n  "statewise_ulbs_coverage.04Nov2026.csv.7z": "https://api.github.com/repos/ramSeraph/opendata/releases/assets/708656965",\n};
+const API = "https://api.github.com/repos/ramSeraph/opendata/releases/assets/";
+const ASSETS = {
+  "villages.04Nov2026.csv.7z": API + "708673215",
+  "urban_local_bodies.04Nov2026.csv.7z": API + "708649438",
+  "statewise_ulbs_coverage.04Nov2026.csv.7z": API + "708656965",
+};
 const assets = [
   `villages.${DATE}.csv.7z`,
   `urban_local_bodies.${DATE}.csv.7z`,
