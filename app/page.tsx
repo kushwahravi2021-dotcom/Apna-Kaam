@@ -13,7 +13,7 @@ export default function HomePage() {
           <div>
             <p className="text-xs font-medium text-white/75">आपका स्थान</p>
             <Link href="/locations" className="mt-1 flex items-center gap-1 text-sm font-bold">
-              <MapPin size={16} /> Chhindwara <ChevronRight size={15} />
+              <MapPin size={16} /> Ganj Basoda, Vidisha <ChevronRight size={15} />
             </Link>
           </div>
           <Link href="/notifications" className="rounded-full bg-white/15 p-3 backdrop-blur-sm transition hover:bg-white/25">
