@@ -91,6 +91,7 @@ model ProviderProfile {
   bankIfsc       String?
   verification   ProviderVerificationStatus @default(PENDING)
   availability   ProviderAvailability       @default(OFFLINE)
+  deletedAt      DateTime?
   rating         Float                      @default(0)
   reviewCount    Int                        @default(0)
   services       ProviderService[]
