@@ -24,10 +24,10 @@ export async function GET() {
   const user = await getProvider();
   if (!user) return NextResponse.json({ ok: false, message: "Provider access required." }, { status: 403 });
   const payment = user.providerProfile;
+  if (!payment) return NextResponse.json({ ok: false, message: "Provider payment profile नहीं मिला." }, { status: 404 });
   return NextResponse.json({
     ok: true,
     payment: {
-      ...payment,
       bankAccountNumber: payment.bankAccountNumber
         ? "••••" + payment.bankAccountNumber.slice(-4)
         : null,
