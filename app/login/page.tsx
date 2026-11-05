@@ -122,11 +122,9 @@ export default function LoginPage() {
         </form>
       )}
 
-      <div className="my-5 flex items-center gap-3 text-xs text-slate-400"><span className="h-px flex-1 bg-slate-200" />or<span className="h-px flex-1 bg-slate-200" /></div>
-      <button type="button" className="w-full rounded-2xl border py-3.5 font-bold">🇬 Continue with Google</button>
       {notice && <p className="mt-4 rounded-xl bg-green-50 p-3 text-sm text-green-700">{notice}</p>}
       {error && <p className="mt-4 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
-      <p className="mt-6 text-center text-[11px] text-slate-400">By continuing you agree to our Terms & Conditions & Privacy Policy</p>
+      <p className="mt-6 text-center text-[11px] text-slate-400">By continuing you agree to our <Link href="/terms" className="font-bold underline">Terms & Conditions</Link> and <Link href="/privacy" className="font-bold underline">Privacy Policy</Link>.</p>
       <Link href="/" className="mt-6 block text-center text-sm font-bold text-[#ff6500]">← Home</Link>
     </main>
   );
