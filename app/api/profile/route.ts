@@ -7,7 +7,7 @@ async function currentUser() {
   const store = await cookies();
   const session = readSessionToken(store.get(sessionCookieName)?.value);
   if (!session) return null;
-  return prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, phone: true, role: true, name: true, city: true, area: true } });
+  return prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, phone: true, role: true, name: true, city: true, area: true, avatarUrl: true } });
 }
 export async function GET() {
   const user = await currentUser();
