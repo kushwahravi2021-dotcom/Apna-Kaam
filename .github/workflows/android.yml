@@ -23,11 +23,11 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
-          node-version: 20
-      - uses: actions/setup-java@v4
+          node-version: 24
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: "21"
@@ -70,7 +70,7 @@ jobs:
           sha256sum dist/apna-kaam.apk > dist/apna-kaam.apk.sha256
           rm -f android/apna-kaam-release.keystore
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: apna-kaam-apk
           path: dist/*
