@@ -84,6 +84,11 @@ model ProviderProfile {
   startingPrice  Decimal?                   @db.Decimal(10,2)
   serviceArea    String?
   workingHours  String?
+  verificationDocumentUrl String?
+  upiId          String?
+  bankAccountName String?
+  bankAccountNumber String?
+  bankIfsc       String?
   verification   ProviderVerificationStatus @default(PENDING)
   availability   ProviderAvailability       @default(OFFLINE)
   rating         Float                      @default(0)
