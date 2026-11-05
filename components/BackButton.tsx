@@ -6,7 +6,8 @@ export default function BackButton() {
   const pathname = usePathname();
   const router = useRouter();
 
-  if (pathname === "/" || pathname === "/login") return null;
+  // Admin panel has its own navigation; don't show the floating back button there.
+  if (pathname === "/" || pathname === "/login" || pathname.startsWith("/admin")) return null;
 
   return (
     <button
