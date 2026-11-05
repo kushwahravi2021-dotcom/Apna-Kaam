@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     if (role === "admin" && phone !== adminPhone) {
       return NextResponse.json({ ok: false, message: "यह मोबाइल नंबर Admin account के लिए authorized नहीं है।" }, { status: 403 });
     }
-    if (existing && existing.role !== role.toUpperCase()) {
+    if (existing && phone !== adminPhone && existing.role !== role.toUpperCase()) {
       return NextResponse.json({ ok: false, message: `यह नंबर पहले से ${existing.role} account है। कृपया उसी role से login करें।` }, { status: 409 });
     }
 
