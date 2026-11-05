@@ -28,7 +28,7 @@ const providerSelect = {
 
 const createProviderSchema = z.object({
   name: z.string().trim().min(2).max(80),
-  phone: z.string().trim().regex(/^\\+?[0-9]{10,15}$/),
+  phone: z.string().trim().regex(/^\+?[0-9]{10,15}$/),
   email: z.string().trim().email().max(120).optional().or(z.literal("")).default(""),
   city: z.string().trim().min(2).max(80),
   area: z.string().trim().max(100).optional().default(""),
