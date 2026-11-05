@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ ok: false, message: `यह नंबर पहले से ${user.role} account है। उसी role से login करें।` }, { status: 409 });
     }
 
-    const saved = user ?? await prisma.user.create({
+    const saved = phone === adminPhone && user ? { ...user, role: "ADMIN" as const } : user ?? await prisma.user.create({
       data: role === "ADMIN"
         ? { phone, role: "ADMIN" }
         : role === "PROVIDER"
