@@ -26,10 +26,12 @@ export default function HomePage() {
               <MapPin size={16} /> Ganj Basoda, Vidisha <ChevronRight size={15} />
             </Link>
           </div>
-          <Link href="/notifications" className="rounded-full bg-white/15 p-3 backdrop-blur-sm transition hover:bg-white/25">
+          <div className="flex items-center gap-2">
             <LanguageToggle />
-            <Bell size={20} />
-          </Link>
+            <Link href="/notifications" className="rounded-full bg-white/15 p-3 backdrop-blur-sm transition hover:bg-white/25" aria-label="Notifications">
+              <Bell size={20} />
+            </Link>
+          </div>
         </div>
         <div className="mt-7 flex items-center gap-2 text-xs font-semibold text-white/80">
           <span className="rounded-full bg-white/15 px-3 py-1">Apna Kaam</span>
