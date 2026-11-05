@@ -1,0 +1,6 @@
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { readSessionToken, sessionCookieName } from "@/lib/auth";
+async function admin(){const c=await cookies();const s=readSessionToken(c.get(sessionCookieName)?.value);if(!s)return false;const u=await prisma.user.findUnique({where:{id:s.userId},select:{role:true}});return u?.role==="ADMIN";}
+export async function GET(){if(!(await admin()))return NextResponse.json({ok:false,message:"Admin access required."},{status:403});try{const [users,providers,bookings,completed,cancelled,paid,complaints,revenue]=await Promise.all([prisma.user.count(),prisma.providerProfile.count({where:{deletedAt:null}}),prisma.booking.count(),prisma.booking.count({where:{status:"COMPLETED"}}),prisma.booking.count({where:{status:"CANCELLED"}}),prisma.payment.count({where:{status:"PAID"}}),prisma.complaint.count(),prisma.payment.aggregate({where:{status:"PAID"},_sum:{amount:true,commission:true}})]);return NextResponse.json({ok:true,report:{users,providers,bookings,completed,cancelled,paidPayments:paid,complaints,revenue:Number(revenue._sum.amount||0),commission:Number(revenue._sum.commission||0)}});}catch{return NextResponse.json({ok:false,message:"Reports load नहीं हुईं।"},{status:503});}}
