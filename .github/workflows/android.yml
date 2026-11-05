@@ -8,9 +8,9 @@ on:
         required: true
         type: string
       publish_release:
-        description: "Publish debug APK as a GitHub Release"
+        description: "Publish the built APK as the stable GitHub Release"
         required: true
-        default: "no"
+        default: "yes"
         type: choice
         options:
           - "no"
@@ -38,25 +38,51 @@ jobs:
       - name: Build Android wrapper
         env:
           NEXT_PUBLIC_APP_URL: ${{ inputs.app_url }}
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
-          node -e "const u = new URL(process.env.NEXT_PUBLIC_APP_URL); if (u.protocol !== \"https:\") throw new Error(\"app_url must use HTTPS\")"
+          node -e "const u = new URL(process.env.NEXT_PUBLIC_APP_URL); if (u.protocol !== 'https:') throw new Error('app_url must use HTTPS')"
           npx cap add android
           npx cap sync android
-          cd android
-          chmod +x gradlew
-          ./gradlew assembleDebug
+          mkdir -p dist
+          if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
+            echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/apna-kaam-release.keystore
+            export ANDROID_KEYSTORE_PATH="$GITHUB_WORKSPACE/android/apna-kaam-release.keystore"
+            node scripts/configure-android-signing.mjs
+            cd android
+            chmod +x gradlew
+            ./gradlew assembleRelease
+            cd ..
+            cp android/app/build/outputs/apk/release/app-release.apk dist/apna-kaam.apk
+            echo "signed-release" > dist/channel.txt
+          else
+            cd android
+            chmod +x gradlew
+            ./gradlew assembleDebug
+            cd ..
+            cp android/app/build/outputs/apk/debug/app-debug.apk dist/apna-kaam.apk
+            echo "debug" > dist/channel.txt
+          fi
+          sha256sum dist/apna-kaam.apk > dist/apna-kaam.apk.sha256
+          rm -f android/apna-kaam-release.keystore
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: apna-kaam-debug-apk
-          path: android/app/build/outputs/apk/debug/app-debug.apk
+          name: apna-kaam-apk
+          path: dist/*
           if-no-files-found: error
           retention-days: 30
-      - name: Publish GitHub Release
+      - name: Publish stable GitHub Release
         if: inputs.publish_release == 'yes'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: android-debug-${{ github.run_number }}
-          name: Apna Kaam Android Debug ${{ github.run_number }}
-          prerelease: true
-          files: android/app/build/outputs/apk/debug/app-debug.apk
+          tag_name: android-latest
+          name: Apna Kaam Android — Latest
+          prerelease: ${{ hashFiles('dist/channel.txt') != '' && contains(join(fromJSON('["debug","signed-release"]'), ''), 'debug') }}
+          make_latest: true
+          overwrite_files: true
+          files: |
+            dist/apna-kaam.apk
+            dist/apna-kaam.apk.sha256
