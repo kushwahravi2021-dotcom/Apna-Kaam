@@ -38,10 +38,11 @@ export async function POST(request: Request) {
     }
 
     if (development) {
-      const crypto = await import("crypto");
-      const expected = crypto.createHmac("sha256", process.env.AUTH_SECRET!).update(phone + ":123456").digest("hex");
-      if (challenge.codeHash !== expected) {
-        return NextResponse.json({ ok: false, message: "OTP गलत है।" }, { status: 401 });
+      // Demo testing mode always uses 123456. Accept the code directly so a
+      // stale/mismatched challenge hash cannot incorrectly reject the demo OTP.
+      if (code !== "123456") {
+        await prisma.otpChallenge.update({ where: { id: challenge.id }, data: { attempts: { increment: 1 } } });
+        return NextResponse.json({ ok: false, message: "Demo OTP गलत है। 123456 डालें।" }, { status: 401 });
       }
     } else {
       const accountSid = process.env.TWILIO_ACCOUNT_SID;
