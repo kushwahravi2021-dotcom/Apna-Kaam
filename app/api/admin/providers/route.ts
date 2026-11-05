@@ -21,6 +21,7 @@ const providerSelect = {
   verification: true,
   availability: true,
   createdAt: true,
+  deletedAt: true,
   user: { select: { id: true, name: true, phone: true, city: true, area: true } },
   services: { select: { category: { select: { id: true, name: true, icon: true } } } },
 } as const;
@@ -38,7 +39,7 @@ export async function GET() {
 
 const actionSchema = z.object({
   providerId: z.string().min(1),
-  action: z.enum(["APPROVE", "REJECT", "BLOCK", "UNBLOCK", "ACTIVATE", "DEACTIVATE", "DELETE"]),
+  action: z.enum(["APPROVE", "REJECT", "BLOCK", "UNBLOCK", "ACTIVATE", "DEACTIVATE", "DELETE", "RESTORE"]),
 });
 
 export async function PATCH(request: Request) {
@@ -59,24 +60,36 @@ export async function PATCH(request: Request) {
       if (!provider) return { kind: "missing" as const };
 
       if (action === "DELETE") {
-        const [bookings, reviews] = await Promise.all([
-          tx.booking.count({ where: { providerId } }),
-          tx.review.count({ where: { providerId } }),
-        ]);
-        if (bookings > 0 || reviews > 0) return { kind: "protected" as const, bookings, reviews };
-
-        await tx.providerProfile.delete({ where: { id: providerId } });
-        await tx.user.delete({ where: { id: provider.userId } });
+        if (provider.verification === "SUSPENDED" && provider.availability === "OFFLINE") {
+          const updated = await tx.providerProfile.update({ where: { id: providerId }, data: { deletedAt: new Date(), availability: "OFFLINE" }, select: providerSelect });
+          await tx.adminAction.create({ data: { adminId, action: "PROVIDER_DELETED", targetType: "ProviderProfile", targetId: providerId } });
+          return { kind: "updated" as const, provider: updated };
+        }
+        const bookings = await tx.booking.count({ where: { providerId } });
+        const reviews = await tx.review.count({ where: { providerId } });
+        if (bookings > 0 || reviews > 0) {
+          const updated = await tx.providerProfile.update({ where: { id: providerId }, data: { deletedAt: new Date(), availability: "OFFLINE" }, select: providerSelect });
+          await tx.adminAction.create({ data: { adminId, action: "PROVIDER_DELETED", targetType: "ProviderProfile", targetId: providerId } });
+          return { kind: "updated" as const, provider: updated };
+        }
+        const updated = await tx.providerProfile.update({ where: { id: providerId }, data: { deletedAt: new Date(), availability: "OFFLINE" }, select: providerSelect });
         await tx.adminAction.create({ data: { adminId, action: "PROVIDER_DELETED", targetType: "ProviderProfile", targetId: providerId } });
-        return { kind: "deleted" as const };
+        return { kind: "updated" as const, provider: updated };
       }
 
+      if (action === "RESTORE") {
+        const updated = await tx.providerProfile.update({ where: { id: providerId }, data: { deletedAt: null, verification: "PENDING", availability: "OFFLINE" }, select: providerSelect });
+        await tx.adminAction.create({ data: { adminId, action: "PROVIDER_RESTORED", targetType: "ProviderProfile", targetId: providerId } });
+        return { kind: "updated" as const, provider: updated };
+      }
+
+      if (provider.deletedAt) return { kind: "invalid" as const, message: "पहले provider को restore करें।" };
       let verification = provider.verification;
       let availability = provider.availability;
       let auditAction = "";
 
       if (action === "APPROVE") {
-        if (verification !== "PENDING") return { kind: "invalid" as const, message: "केवल pending provider को approve किया जा सकता है।" };
+        if (verification !== "PENDING" && verification !== "REJECTED") return { kind: "invalid" as const, message: "केवल pending provider को approve किया जा सकता है।" };
         verification = "APPROVED";
         auditAction = "PROVIDER_APPROVED";
       } else if (action === "REJECT") {
