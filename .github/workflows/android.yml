@@ -57,6 +57,7 @@ jobs:
             cd ..
             cp android/app/build/outputs/apk/release/app-release.apk dist/apna-kaam.apk
             echo "signed-release" > dist/channel.txt
+            echo "APK_CHANNEL=signed-release" >> "$GITHUB_ENV"
           else
             cd android
             chmod +x gradlew
@@ -64,6 +65,7 @@ jobs:
             cd ..
             cp android/app/build/outputs/apk/debug/app-debug.apk dist/apna-kaam.apk
             echo "debug" > dist/channel.txt
+            echo "APK_CHANNEL=debug" >> "$GITHUB_ENV"
           fi
           sha256sum dist/apna-kaam.apk > dist/apna-kaam.apk.sha256
           rm -f android/apna-kaam-release.keystore
@@ -80,7 +82,7 @@ jobs:
         with:
           tag_name: android-latest
           name: Apna Kaam Android — Latest
-          prerelease: ${{ hashFiles('dist/channel.txt') != '' && contains(join(fromJSON('["debug","signed-release"]'), ''), 'debug') }}
+          prerelease: ${{ env.APK_CHANNEL == 'debug' }}
           make_latest: true
           overwrite_files: true
           files: |
