@@ -10,11 +10,13 @@ export async function POST(request: Request) {
   const session = readSessionToken(cookieStore.get(sessionCookieName)?.value);
   if (!session) return NextResponse.json({ ok: false, message: "पहले login करें।" }, { status: 401 });
   const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { role: true, providerProfile: { select: { id: true } } } });
-  if (!user || user.role !== "PROVIDER" || !user.providerProfile) return NextResponse.json({ ok: false, message: "Provider access required." }, { status: 403 });
+  if (!user || (user.role === "PROVIDER" && !user.providerProfile)) return NextResponse.json({ ok: false, message: "Provider profile नहीं मिला।" }, { status: 403 });
+  if (user.role !== "CUSTOMER" && user.role !== "PROVIDER" && user.role !== "ADMIN") return NextResponse.json({ ok: false, message: "Access required." }, { status: 403 });
 
   const body = await request.json().catch(() => null) as { kind?: "photo" | "document"; mimeType?: string; dataUrl?: string } | null;
   if (!body?.kind || !body.dataUrl || !body.mimeType) return NextResponse.json({ ok: false, message: "File select करें।" }, { status: 400 });
   if (body.kind !== "photo" && body.kind !== "document") return NextResponse.json({ ok: false, message: "Invalid file type." }, { status: 400 });
+  if (body.kind === "document" && user.role !== "PROVIDER") return NextResponse.json({ ok: false, message: "ID proof केवल provider के लिए है।" }, { status: 403 });
   const allowed = body.kind === "photo" ? ["image/jpeg", "image/png", "image/webp"] : ["image/jpeg", "image/png", "application/pdf"];
   if (!allowed.includes(body.mimeType)) return NextResponse.json({ ok: false, message: "यह file format supported नहीं है।" }, { status: 400 });
   const match = body.dataUrl.match(/^data:([^;]+);base64,(.+)$/);
