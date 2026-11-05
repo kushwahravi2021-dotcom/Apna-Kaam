@@ -12,9 +12,9 @@ export default function HomePage() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-medium text-white/75">आपका स्थान</p>
-            <button className="mt-1 flex items-center gap-1 text-sm font-bold">
+            <Link href="/locations" className="mt-1 flex items-center gap-1 text-sm font-bold">
               <MapPin size={16} /> Chhindwara <ChevronRight size={15} />
-            </button>
+            </Link>
           </div>
           <Link href="/notifications" className="rounded-full bg-white/15 p-3 backdrop-blur-sm transition hover:bg-white/25">
             <Bell size={20} />
