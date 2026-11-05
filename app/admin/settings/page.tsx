@@ -6,7 +6,8 @@ import Link from "next/link";
 export default function AdminSettings() {
   const [user, setUser] = useState<{name:string|null;phone:string;city:string|null;area:string|null;avatarUrl:string|null}|null>(null);
   const [form, setForm] = useState({name:"",city:"",area:""});
-  const [saving, setSaving] = useState(false);\n  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
