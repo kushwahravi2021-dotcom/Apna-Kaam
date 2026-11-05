@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { normalizePhone } from "@/lib/auth";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 type RequestedRole = "customer" | "provider" | "admin";
 
