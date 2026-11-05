@@ -3,7 +3,7 @@ import path from "node:path";
 import { execFileSync } from "node:child_process";
 
 const DATE = "04Nov2026";
-const BASE = "https://ramseraph.github.io/opendata/lgd/archives/2026/November/04";
+const ASSETS = {\n  "villages.04Nov2026.csv.7z": "https://api.github.com/repos/ramSeraph/opendata/releases/assets/708673215",\n  "urban_local_bodies.04Nov2026.csv.7z": "https://api.github.com/repos/ramSeraph/opendata/releases/assets/708649438",\n  "statewise_ulbs_coverage.04Nov2026.csv.7z": "https://api.github.com/repos/ramSeraph/opendata/releases/assets/708656965",\n};
 const assets = [
   `villages.${DATE}.csv.7z`,
   `urban_local_bodies.${DATE}.csv.7z`,
@@ -16,7 +16,7 @@ fs.mkdirSync(root, { recursive: true });
 
 for (const asset of assets) {
   const archive = path.join(root, asset);
-  const response = await fetch(`${BASE}/${asset}`);
+  const response = await fetch(ASSETS[asset], { headers: { Accept: "application/octet-stream", "User-Agent": "Apna-Kaam-build" } });
   if (!response.ok) throw new Error(`Could not download ${asset}: HTTP ${response.status}`);
   fs.writeFileSync(archive, Buffer.from(await response.arrayBuffer()));
   execFileSync("npx", ["7z-wasm", "x", archive, "-o" + root, "-y"], { stdio: "inherit" });
