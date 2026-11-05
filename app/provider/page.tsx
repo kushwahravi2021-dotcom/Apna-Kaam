@@ -17,6 +17,7 @@ export default function ProviderPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    fetch("/api/profile").then(async r => { const d = await r.json(); if (!r.ok || !d.ok || d.user?.role !== "PROVIDER") { window.location.replace("/login"); return; } }).catch(() => window.location.replace("/login"));
     fetch("/api/services").then(async r => {
       const d = await r.json();
       if (!r.ok || !d.ok) throw new Error(d.message || "Services लोड नहीं हुईं");
