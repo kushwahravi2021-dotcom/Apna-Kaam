@@ -1,0 +1,6 @@
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+import { readSessionToken, sessionCookieName } from "@/lib/auth";
+async function admin(){const c=await cookies();const s=readSessionToken(c.get(sessionCookieName)?.value);if(!s)return false;const u=await prisma.user.findUnique({where:{id:s.userId},select:{role:true}});return u?.role==="ADMIN";}
+export async function GET(){if(!(await admin()))return NextResponse.json({ok:false,message:"Admin access required."},{status:403});try{const payments=await prisma.payment.findMany({orderBy:{createdAt:"desc"},take:200,select:{id:true,amount:true,commission:true,status:true,providerRef:true,createdAt:true,booking:{select:{id:true,status:true,customer:{select:{name:true,phone:true}},provider:{select:{user:{select:{name:true,phone:true}}}},category:{select:{name:true}}}}}});return NextResponse.json({ok:true,payments});}catch{return NextResponse.json({ok:false,message:"Payments load नहीं हुए।"},{status:503});}}
