@@ -53,7 +53,7 @@ async function main() {
     console.log("Demo providers seeded. Login OTP for these sample accounts is 123456.");
   }
 
-  const adminPhone = process.env.ADMIN_PHONE?.replace(/\D/g, "");
+  const adminPhone = (process.env.ADMIN_PHONE ?? (process.env.DEMO_MODE === "true" ? "8982669983" : "")).replace(/\D/g, "");
   if (adminPhone) {
     if (adminPhone.length !== 10) throw new Error("ADMIN_PHONE must contain exactly 10 digits.");
     await prisma.user.upsert({
