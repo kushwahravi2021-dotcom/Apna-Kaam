@@ -8,11 +8,19 @@
 
 body {
   margin: 0;
-  background: #f7f8fa;
-  color: #111827;
+  background: #f8fafc;
+  color: #0f172a;
   font-family: Arial, Helvetica, sans-serif;
 }
 
 button, input { font: inherit; }
 
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+.home-hero {
+  background:
+    radial-gradient(circle at 85% 10%, rgba(255,255,255,.18), transparent 28%),
+    linear-gradient(135deg, #0f766e 0%, #0ea5a4 48%, #0f7ea8 100%);
+  border-bottom-left-radius: 28px;
+  border-bottom-right-radius: 28px;
+}
