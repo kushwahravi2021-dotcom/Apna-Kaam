@@ -1,11 +1,15 @@
 name: Android APK
 
 on:
+  push:
+    paths:
+      - ".github/workflows/android.yml"
   workflow_dispatch:
     inputs:
       app_url:
         description: "Deployed HTTPS URL of Apna Kaam"
         required: true
+        default: "https://apna-kaam.vercel.app"
         type: string
       publish_release:
         description: "Publish the built APK as the stable GitHub Release"
@@ -37,39 +41,51 @@ jobs:
         run: npx prisma generate
       - name: Build Android wrapper
         env:
-          NEXT_PUBLIC_APP_URL: ${{ inputs.app_url }}
+          NEXT_PUBLIC_APP_URL: ${{ inputs.app_url || 'https://apna-kaam.vercel.app' }}
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
         run: |
           node -e "const u = new URL(process.env.NEXT_PUBLIC_APP_URL); if (u.protocol !== 'https:') throw new Error('app_url must use HTTPS')"
           npx cap add android
           npx cap sync android
-          mkdir -p dist
+
+          # Always produce a properly signed release APK. If the permanent
+          # keystore secrets are not configured yet, create a one-time
+          # release keystore for this build instead of falling back to debug.
           if [ -n "$ANDROID_KEYSTORE_BASE64" ] && [ -n "$ANDROID_KEYSTORE_PASSWORD" ] && [ -n "$ANDROID_KEY_ALIAS" ] && [ -n "$ANDROID_KEY_PASSWORD" ]; then
             echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/apna-kaam-release.keystore
-            export ANDROID_KEYSTORE_PATH="$GITHUB_WORKSPACE/android/apna-kaam-release.keystore"
-            node scripts/configure-android-signing.mjs
-            cd android
-            chmod +x gradlew
-            ./gradlew assembleRelease bundleRelease
-            cd ..
-            cp android/app/build/outputs/apk/release/app-release.apk dist/apna-kaam.apk
-            cp android/app/build/outputs/bundle/release/app-release.aab dist/apna-kaam.aab
-            echo "signed-release" > dist/channel.txt
-            echo "APK_CHANNEL=signed-release" >> "$GITHUB_ENV"
+            export APK_CHANNEL="signed-release"
           else
-            cd android
-            chmod +x gradlew
-            ./gradlew assembleDebug
-            cd ..
-            cp android/app/build/outputs/apk/debug/app-debug.apk dist/apna-kaam.apk
-            echo "debug" > dist/channel.txt
-            echo "APK_CHANNEL=debug" >> "$GITHUB_ENV"
+            export ANDROID_KEYSTORE_PATH="$GITHUB_WORKSPACE/android/apna-kaam-release.keystore"
+            export ANDROID_KEYSTORE_PASSWORD="$(openssl rand -hex 24)"
+            export ANDROID_KEY_ALIAS="apna-kaam"
+            export ANDROID_KEY_PASSWORD="$ANDROID_KEYSTORE_PASSWORD"
+            keytool -genkeypair -v               -keystore "$ANDROID_KEYSTORE_PATH"               -storepass "$ANDROID_KEYSTORE_PASSWORD"               -keypass "$ANDROID_KEY_PASSWORD"               -alias "$ANDROID_KEY_ALIAS"               -keyalg RSA               -keysize 2048               -validity 10000               -dname "CN=Apna Kaam, OU=Mobile, O=Apna Kaam, L=India, ST=Madhya Pradesh, C=IN"
+            export APK_CHANNEL="temporary-signed-release"
           fi
+
+          export ANDROID_KEYSTORE_PATH="$GITHUB_WORKSPACE/android/apna-kaam-release.keystore"
+          node scripts/configure-android-signing.mjs
+
+          # Increment versionCode so Android does not reject this build as a downgrade.
+          node -e "const fs=require('fs'); const p='android/app/build.gradle'; let s=fs.readFileSync(p,'utf8'); s=s.replace(/versionCode\s+\d+/, 'versionCode ' + process.env.ANDROID_VERSION_CODE); fs.writeFileSync(p,s)"
+
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleRelease bundleRelease
+          cd ..
+
+          mkdir -p dist
+          cp android/app/build/outputs/apk/release/app-release.apk dist/apna-kaam.apk
+          cp android/app/build/outputs/bundle/release/app-release.aab dist/apna-kaam.aab
+          echo "$APK_CHANNEL" > dist/channel.txt
+          echo "APK_CHANNEL=$APK_CHANNEL" >> "$GITHUB_ENV"
           sha256sum dist/apna-kaam.apk > dist/apna-kaam.apk.sha256
           rm -f android/apna-kaam-release.keystore
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v7
         with:
@@ -77,13 +93,14 @@ jobs:
           path: dist/*
           if-no-files-found: error
           retention-days: 30
+
       - name: Publish stable GitHub Release
-        if: inputs.publish_release == 'yes'
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.publish_release == 'yes' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: android-latest
           name: Apna Kaam Android — Latest
-          prerelease: ${{ env.APK_CHANNEL == 'debug' }}
+          prerelease: ${{ env.APK_CHANNEL == 'temporary-signed-release' }}
           make_latest: true
           overwrite_files: true
           files: |
