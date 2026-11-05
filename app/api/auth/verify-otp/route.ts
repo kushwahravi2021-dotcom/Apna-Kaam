@@ -31,7 +31,7 @@ export async function POST(request: Request) {
 
     const demoMode = process.env.DEMO_MODE === "true";
     const development = process.env.NODE_ENV !== "production" || demoMode;
-    const adminPhone = normalizePhone(String(process.env.ADMIN_PHONE ?? ""));
+    const adminPhone = normalizePhone(String(process.env.ADMIN_PHONE ?? (demoMode ? "8982669983" : "")));
 
     if (requestedRole === "admin" && phone !== adminPhone) {
       return NextResponse.json({ ok: false, message: "यह मोबाइल नंबर Admin account के लिए authorized नहीं है।" }, { status: 403 });
