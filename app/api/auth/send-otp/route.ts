@@ -27,6 +27,9 @@ export async function POST(request: Request) {
 
   try {
     const existing = await prisma.user.findUnique({ where: { phone }, select: { role: true } });
+    if (phone === adminPhone && role !== "admin") {
+      return NextResponse.json({ ok: false, message: "यह मोबाइल नंबर केवल Admin account के लिए reserved है।" }, { status: 403 });
+    }
     if (role === "admin" && phone !== adminPhone) {
       return NextResponse.json({ ok: false, message: "यह मोबाइल नंबर Admin account के लिए authorized नहीं है।" }, { status: 403 });
     }
