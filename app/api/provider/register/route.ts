@@ -13,10 +13,6 @@ const providerSchema = z.object({
   startingPrice: z.coerce.number().positive().max(1000000),
   avatarUrl: z.string().trim().max(1500000).optional().default(""),
   verificationDocumentUrl: z.string().trim().max(5500000).optional().default(""),
-  upiId: z.string().trim().max(100).optional().default(""),
-  bankAccountName: z.string().trim().max(120).optional().default(""),
-  bankAccountNumber: z.string().trim().max(40).optional().default(""),
-  bankIfsc: z.string().trim().max(20).optional().default(""),
   categoryIds: z.array(z.string().min(1)).min(1).max(12),
 });
 
@@ -45,15 +41,13 @@ export async function POST(request: Request) {
         where: { userId: session.userId },
         update: {
           bio: data.bio, experienceYears: data.experienceYears, startingPrice: data.startingPrice, serviceArea: data.area,
-          verificationDocumentUrl: data.verificationDocumentUrl || null, upiId: data.upiId || null,
-          bankAccountName: data.bankAccountName || null, bankAccountNumber: data.bankAccountNumber || null, bankIfsc: data.bankIfsc || null,
+          verificationDocumentUrl: data.verificationDocumentUrl || null,
           verification: account.providerProfile?.verification ?? "PENDING", availability: account.providerProfile?.availability ?? "OFFLINE",
           services: { deleteMany: {}, create: data.categoryIds.map(categoryId => ({ categoryId })) },
         },
         create: {
           userId: session.userId, bio: data.bio, experienceYears: data.experienceYears, startingPrice: data.startingPrice, serviceArea: data.area,
-          verificationDocumentUrl: data.verificationDocumentUrl || null, upiId: data.upiId || null,
-          bankAccountName: data.bankAccountName || null, bankAccountNumber: data.bankAccountNumber || null, bankIfsc: data.bankIfsc || null,
+          verificationDocumentUrl: data.verificationDocumentUrl || null,
           verification: "PENDING", availability: "OFFLINE", services: { create: data.categoryIds.map(categoryId => ({ categoryId })) },
         },
       });
