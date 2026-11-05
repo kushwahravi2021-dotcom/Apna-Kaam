@@ -21,9 +21,9 @@ async function main() {
 
   if (process.env.DEMO_MODE === "true") {
     const demoProviders = [
-      { phone: "+919999990001", name: "Ramesh Kumar", city: "Chhindwara", area: "Gandhi Ganj", bio: "घर की plumbing और leak repair का demo service provider", experienceYears: 6, startingPrice: 299, categories: ["Plumber"] },
-      { phone: "+919999990002", name: "Suresh Patel", city: "Chhindwara", area: "Parasia Road", bio: "Wiring, fan और switch repair का demo service provider", experienceYears: 8, startingPrice: 349, categories: ["Electrician"] },
-      { phone: "+919999990003", name: "Asha Verma", city: "Chhindwara", area: "Narsinghpur Road", bio: "Furniture repair और carpentry का demo service provider", experienceYears: 5, startingPrice: 399, categories: ["Carpenter"] },
+      { phone: "+919999990001", name: "Ramesh Kumar", city: "Ganj Basoda", area: "Main Market", bio: "घर की plumbing और leak repair का demo service provider", experienceYears: 6, startingPrice: 299, categories: ["Plumber"] },
+      { phone: "+919999990002", name: "Suresh Patel", city: "Ganj Basoda", area: "Station Road", bio: "Wiring, fan और switch repair का demo service provider", experienceYears: 8, startingPrice: 349, categories: ["Electrician"] },
+      { phone: "+919999990003", name: "Asha Verma", city: "Ganj Basoda", area: "Vidisha Road", bio: "Furniture repair और carpentry का demo service provider", experienceYears: 5, startingPrice: 399, categories: ["Carpenter"] },
     ];
 
     for (const demo of demoProviders) {
