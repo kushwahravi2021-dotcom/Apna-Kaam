@@ -12,6 +12,7 @@ export async function GET(request: Request) {
       where: {
         verification: "APPROVED",
         availability: "AVAILABLE",
+        deletedAt: null,
         ...(city ? { user: { city: { equals: city, mode: "insensitive" } } } : {}),
         ...(area ? { serviceArea: { contains: area, mode: "insensitive" } } : {}),
         ...(categoryId ? { services: { some: { categoryId } } } : {}),
