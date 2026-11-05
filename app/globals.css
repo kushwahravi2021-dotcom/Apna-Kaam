@@ -1,26 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-:root { color-scheme: light; }
-
-* { box-sizing: border-box; }
-
-body {
-  margin: 0;
-  background: #f8fafc;
-  color: #0f172a;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-button, input { font: inherit; }
-
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
-
-.home-hero {
-  background:
-    radial-gradient(circle at 85% 10%, rgba(255,255,255,.18), transparent 28%),
-    linear-gradient(135deg, #0f766e 0%, #0ea5a4 48%, #0f7ea8 100%);
-  border-bottom-left-radius: 28px;
-  border-bottom-right-radius: 28px;
-}
+:root{color-scheme:light;--ak-orange:#ff6500;--ak-orange-2:#ff7a00;--ak-navy:#10243e;--ak-blue:#1677c8;--ak-green:#39a852;--ak-bg:#f6f8fb}
+*{box-sizing:border-box}html{background:var(--ak-bg)}body{margin:0;background:var(--ak-bg);color:var(--ak-navy);font-family:Arial,Helvetica,sans-serif}button,input,textarea,select{font:inherit}.safe-bottom{padding-bottom:env(safe-area-inset-bottom)}
+.ak-shell{min-height:100vh;background:#fff}.ak-mobile-shell{width:100%;max-width:480px;margin:0 auto;min-height:100vh;background:#fff}.ak-orange{background:linear-gradient(135deg,var(--ak-orange),var(--ak-orange-2))}.ak-orange-text{color:var(--ak-orange)}
+.ak-lang{display:inline-flex;align-items:center;gap:3px;padding:4px;border:1px solid #ffd2b8;border-radius:999px;background:#fff;box-shadow:0 4px 14px rgba(16,36,62,.08)}.ak-lang button{border:0;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:800;color:#344054;background:transparent;cursor:pointer}.ak-lang button.active{color:#fff;background:var(--ak-orange)}
+.ak-banner{position:relative;overflow:hidden;min-height:156px;border-radius:22px;background:linear-gradient(90deg,rgba(10,35,56,.92) 0%,rgba(10,35,56,.66) 55%,rgba(10,35,56,.12) 100%),url("https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1000&q=85") center/cover}
+.ak-worker-photo{width:58px;height:58px;border-radius:18px;object-fit:cover;background:#eaf1f7;border:2px solid #fff;box-shadow:0 4px 12px rgba(16,36,62,.12)}
+.ak-card{border:1px solid #e7edf3;background:#fff;border-radius:18px;box-shadow:0 8px 24px rgba(16,36,62,.06)}
+.ak-bottom-nav{position:fixed;z-index:50;left:50%;bottom:0;transform:translateX(-50%);width:100%;max-width:480px;border-top:1px solid #e9edf2;background:rgba(255,255,255,.96);backdrop-filter:blur(14px)}
