@@ -23,7 +23,16 @@ async function getProvider() {
 export async function GET() {
   const user = await getProvider();
   if (!user) return NextResponse.json({ ok: false, message: "Provider access required." }, { status: 403 });
-  return NextResponse.json({ ok: true, payment: user.providerProfile });
+  const payment = user.providerProfile;
+  return NextResponse.json({
+    ok: true,
+    payment: {
+      ...payment,
+      bankAccountNumber: payment.bankAccountNumber
+        ? "••••" + payment.bankAccountNumber.slice(-4)
+        : null,
+    },
+  });
 }
 
 export async function PATCH(request: Request) {
