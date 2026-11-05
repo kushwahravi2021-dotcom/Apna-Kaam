@@ -53,9 +53,10 @@ jobs:
             node scripts/configure-android-signing.mjs
             cd android
             chmod +x gradlew
-            ./gradlew assembleRelease
+            ./gradlew assembleRelease bundleRelease
             cd ..
             cp android/app/build/outputs/apk/release/app-release.apk dist/apna-kaam.apk
+            cp android/app/build/outputs/bundle/release/app-release.aab dist/apna-kaam.aab
             echo "signed-release" > dist/channel.txt
             echo "APK_CHANNEL=signed-release" >> "$GITHUB_ENV"
           else
@@ -87,4 +88,5 @@ jobs:
           overwrite_files: true
           files: |
             dist/apna-kaam.apk
+            dist/apna-kaam.aab
             dist/apna-kaam.apk.sha256
