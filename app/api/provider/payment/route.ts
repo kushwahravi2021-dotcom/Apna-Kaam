@@ -43,5 +43,14 @@ export async function PATCH(request: Request) {
   const data = parsed.data;
   if (!user.providerProfile) return NextResponse.json({ ok: false, message: "Provider profile नहीं मिला." }, { status: 404 });
   const updated = await prisma.providerProfile.update({ where: { id: user.providerProfile.id }, data: { upiId: data.upiId || null, bankAccountName: data.bankAccountName || null, bankAccountNumber: data.bankAccountNumber || null, bankIfsc: data.bankIfsc || null }, select: { upiId: true, bankAccountName: true, bankAccountNumber: true, bankIfsc: true } });
-  return NextResponse.json({ ok: true, payment: updated, message: "Payment details save हो गईं।" });
+  return NextResponse.json({
+    ok: true,
+    payment: {
+      ...updated,
+      bankAccountNumber: updated.bankAccountNumber
+        ? "••••" + updated.bankAccountNumber.slice(-4)
+        : null,
+    },
+    message: "Payment details save हो गईं।",
+  });
 }
